@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - MSK</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --primary: #9cff93;
+            --primary-container: #00fc40;
+            --secondary: #00bdfd;
+            --tertiary: #8af2ff;
+            --surface: #0e0e0f;
+            --surface-container-low: #131314;
+            --surface-container: #1a191b;
+            --surface-container-high: #201f21;
+            --surface-container-highest: #262627;
+            --on-surface: #ffffff;
+            --on-surface-variant: #adaaab;
+            --on-primary: #006413;
+            --outline: #767576;
+            --outline-variant: #484849;
+            --error: #ff7351;
+        }
+
+        * {
+            border-radius: 0px !important;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Grid Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(0deg, rgba(72, 72, 73, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(72, 72, 73, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Smooth Transitions */
+        a, button, .card-image, .blog-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Typography */
+        .font-space-grotesk {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .font-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* Glow Effects */
+        .glow-hover:hover {
+            box-shadow: 0 0 30px rgba(156, 255, 147, 0.2);
+        }
+
+        /* Category Filters */
+        .cat-filter {
+            color: var(--on-surface-variant);
+            background: transparent;
+            cursor: pointer;
+        }
+        .cat-filter:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .cat-filter.active {
+            color: var(--on-primary);
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Ghost Borders */
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.15);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(14, 14, 15, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Navigation — consistent with portfolio */
+        .msk-nav-link {
+            position: relative;
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+        .msk-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #9cff93;
+            transition: width 0.3s ease;
+        }
+        .msk-nav-link:hover::after {
+            width: 100%;
+        }
+        .msk-nav-link:hover {
+            color: #9cff93;
+        }
+        .msk-nav-active {
+            color: #9cff93;
+        }
+        .msk-nav-active::after {
+            width: 100% !important;
+        }
+
+        /* Sidebar — consistent with portfolio */
+        .sidebar-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 0;
+            width: 100%;
+            cursor: pointer;
+            color: #adaaab;
+            transition: all 0.3s ease;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            position: relative;
+        }
+        .sidebar-icon .material-symbols-outlined {
+            font-size: 20px;
+        }
+        .sidebar-icon.active {
+            color: #9cff93;
+        }
+        .sidebar-icon.active::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 70%;
+            background: #9cff93;
+            box-shadow: 0 0 8px rgba(156, 255, 147, 0.4);
+        }
+        .sidebar-icon:hover {
+            color: #9cff93;
+        }
+
+        /* Content wrapper */
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Grayscale filter for images */
+        .card-image {
+            filter: grayscale(100%);
+        }
+
+        .card-image:hover {
+            filter: grayscale(0%);
+        }
+
+        /* Color Config for Tailwind */
+
+        /* ===== TERMINAL PRELOADER ===== */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0a0a0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'JetBrains Mono', monospace;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.fade-out { opacity: 0; visibility: hidden; }
+        .preloader-terminal { width: 520px; max-width: 90vw; background: #0e0e0f; border: 1px solid #484849; overflow: hidden; }
+        .preloader-titlebar { background: #131314; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #484849; }
+        .preloader-dot { width: 10px; height: 10px; background: #484849; }
+        .preloader-dot.active { background: #9cff93; }
+        .preloader-titlebar span { font-size: 10px; color: #767576; letter-spacing: 2px; text-transform: uppercase; margin-left: auto; }
+        .preloader-body { padding: 20px; min-height: 220px; }
+        .preloader-line { display: flex; gap: 8px; margin-bottom: 6px; font-size: 12px; line-height: 1.8; opacity: 0; transform: translateY(4px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .preloader-line.visible { opacity: 1; transform: translateY(0); }
+        .preloader-line .prompt { color: #9cff93; white-space: nowrap; }
+        .preloader-line .cmd { color: #adaaab; }
+        .preloader-line .status-ok { color: #9cff93; }
+        .preloader-line .status-load { color: #00bdfd; }
+        .preloader-line .status-warn { color: #8af2ff; }
+        .preloader-ascii { margin-top: 16px; text-align: center; font-size: 14px; line-height: 1.3; color: #9cff93; opacity: 0; transform: scale(0.95); transition: opacity 0.5s ease, transform 0.5s ease; text-shadow: 0 0 20px rgba(156,255,147,0.4); }
+        .preloader-ascii.visible { opacity: 1; transform: scale(1); }
+        .preloader-progress { margin-top: 16px; height: 2px; background: #262627; overflow: hidden; }
+        .preloader-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #9cff93, #00fc40); transition: width 0.3s ease; }
+        @keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .preloader-cursor { display: inline-block; width: 7px; height: 14px; background: #9cff93; margin-left: 2px; vertical-align: middle; animation: cursor-blink 0.8s step-end infinite; }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                colors: {
+                    'primary': '#9cff93',
+                    'primary-container': '#00fc40',
+                    'secondary': '#00bdfd',
+                    'tertiary': '#8af2ff',
+                    'surface': '#0e0e0f',
+                    'surface-container-low': '#131314',
+                    'surface-container': '#1a191b',
+                    'surface-container-high': '#201f21',
+                    'surface-container-highest': '#262627',
+                    'on-surface': '#ffffff',
+                    'on-surface-variant': '#adaaab',
+                    'on-primary': '#006413',
+                    'outline': '#767576',
+                    'outline-variant': '#484849',
+                    'error': '#ff7351',
+                },
+                fontFamily: {
+                    'space-grotesk': ['Space Grotesk', 'sans-serif'],
+                    'jetbrains': ['JetBrains Mono', 'monospace'],
+                    'inter': ['Inter', 'sans-serif'],
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface">
+    <!-- ===== TERMINAL PRELOADER ===== -->
+    <div id="preloader">
+        <div class="preloader-terminal">
+            <div class="preloader-titlebar">
+                <div class="preloader-dot active"></div>
+                <div class="preloader-dot"></div>
+                <div class="preloader-dot"></div>
+                <span>msk_terminal v2.4</span>
+            </div>
+            <div class="preloader-body" id="preloaderBody">
+                <div class="preloader-line" data-delay="100">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">querying blog index...<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-line" data-delay="500">
+                    <span class="prompt">[DB]</span>
+                    <span class="cmd">fetching article metadata</span>
+                    <span class="status-ok">[OK]</span>
+                </div>
+                <div class="preloader-line" data-delay="900">
+                    <span class="prompt">[CDN]</span>
+                    <span class="cmd">loading cover assets</span>
+                    <span class="status-load">[CACHED]</span>
+                </div>
+                <div class="preloader-line" data-delay="1300">
+                    <span class="prompt">[RENDER]</span>
+                    <span class="cmd">building card grid</span>
+                    <span class="status-ok">[READY]</span>
+                </div>
+                <div class="preloader-line" data-delay="1700">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">launch --blog-feed<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-ascii" id="preloaderAscii">
+<pre>
+ ███╗   ███╗ ███████╗ ██╗  ██╗
+ ████╗ ████║ ██╔════╝ ██║ ██╔╝
+ ██╔████╔██║ ███████╗ █████╔╝
+ ██║╚██╔╝██║ ╚════██║ ██╔═██╗
+ ██║ ╚═╝ ██║ ███████║ ██║  ██╗
+ ╚═╝     ╚═╝ ╚══════╝ ╚═╝  ╚═╝
+</pre>
+                </div>
+                <div class="preloader-progress">
+                    <div class="preloader-progress-bar" id="preloaderBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        const lines = document.querySelectorAll('#preloaderBody .preloader-line');
+        const ascii = document.getElementById('preloaderAscii');
+        const bar = document.getElementById('preloaderBar');
+        const preloader = document.getElementById('preloader');
+        lines.forEach(line => {
+            const delay = parseInt(line.getAttribute('data-delay'));
+            setTimeout(() => { line.classList.add('visible'); bar.style.width = Math.min((delay / 2800) * 100, 85) + '%'; }, delay);
+        });
+        setTimeout(() => { ascii.classList.add('visible'); bar.style.width = '100%'; }, 2200);
+        setTimeout(() => { preloader.classList.add('fade-out'); }, 2800);
+        setTimeout(() => { preloader.style.display = 'none'; }, 3400);
+    })();
+    </script>
+
+    <!-- Navigation Bar — consistent with portfolio -->
+    <nav class="fixed top-0 left-0 right-0 z-50" style="background:rgba(14,14,15,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(72,72,73,0.15);">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="portfolio.html" class="font-space-grotesk text-2xl font-bold text-primary hover:text-primary-container transition-colors" style="text-decoration:none;">MSK.</a>
+
+            <!-- Center Navigation -->
+            <div class="hidden md:flex gap-8 items-center">
+                <a href="portfolio.html#experience" class="msk-nav-link">Experience</a>
+                <a href="portfolio.html#about" class="msk-nav-link">About</a>
+                <a href="portfolio.html#skills" class="msk-nav-link">Skills</a>
+                <a href="portfolio.html#projects" class="msk-nav-link">Projects</a>
+                <a href="blog.html" class="msk-nav-link msk-nav-active">Blog</a>
+                <a href="portfolio.html#contact" class="msk-nav-link">Contact</a>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-xl" style="color:#adaaab;">dark_mode</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20">
+        <div class="flex">
+            <!-- Left Sidebar -->
+            <aside class="hidden lg:flex flex-col items-center w-20 bg-surface-container-low border-r border-outline-variant/20 min-h-screen py-8 gap-4 fixed left-0 top-16 z-40 justify-center">
+                <a href="portfolio.html#experience" class="sidebar-icon" title="Experience">
+                    <span class="material-symbols-outlined">work_history</span>
+                    <span>Exp</span>
+                </a>
+                <a href="portfolio.html#about" class="sidebar-icon" title="About">
+                    <span class="material-symbols-outlined">person</span>
+                    <span>About</span>
+                </a>
+                <a href="portfolio.html#skills" class="sidebar-icon" title="Skills">
+                    <span class="material-symbols-outlined">terminal</span>
+                    <span>Skills</span>
+                </a>
+                <a href="portfolio.html#projects" class="sidebar-icon" title="Projects">
+                    <span class="material-symbols-outlined">folder_code</span>
+                    <span>Projects</span>
+                </a>
+                <a href="blog.html" class="sidebar-icon active" title="Blog">
+                    <span class="material-symbols-outlined">article</span>
+                    <span>Blog</span>
+                </a>
+                <a href="portfolio.html#contact" class="sidebar-icon" title="Contact">
+                    <span class="material-symbols-outlined">send</span>
+                    <span>Contact</span>
+                </a>
+            </aside>
+
+            <!-- Page Content -->
+            <div class="flex-1 lg:ml-20">
+                <!-- Page Header -->
+                <header class="px-6 sm:px-8 lg:px-12 py-12 sm:py-16 border-b border-outline-variant/20">
+                    <!-- Label -->
+                    <div class="font-jetbrains text-primary text-xs sm:text-sm mb-4 sm:mb-6">
+                        SIGNAL_INTERCEPT // LOG
+                    </div>
+
+                    <!-- Headlines -->
+                    <div class="space-y-2 sm:space-y-0">
+                        <h1 class="font-space-grotesk text-3xl sm:text-4xl md:text-5xl text-on-surface leading-tight">
+                            THREAT ANALYSIS
+                        </h1>
+                        <h2 class="font-space-grotesk text-3xl sm:text-4xl md:text-5xl text-outline-variant leading-tight">
+                            ARCHIVES
+                        </h2>
+                    </div>
+                </header>
+
+                <!-- Blog Cards Section (dynamically loaded from GitHub CMS) -->
+                <section id="blog" class="px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
+                    <!-- Category Filters -->
+                    <div class="flex flex-wrap gap-3 mb-12">
+                        <button class="cat-filter active font-jetbrains text-xs px-4 py-2 border border-[var(--outline-variant)] transition-all" data-cat="all">ALL</button>
+                        <button class="cat-filter font-jetbrains text-xs px-4 py-2 border border-[var(--outline-variant)] transition-all" data-cat="grc">GRC</button>
+                        <button class="cat-filter font-jetbrains text-xs px-4 py-2 border border-[var(--outline-variant)] transition-all" data-cat="cloud-security">CLOUD SECURITY</button>
+                        <button class="cat-filter font-jetbrains text-xs px-4 py-2 border border-[var(--outline-variant)] transition-all" data-cat="compliance">COMPLIANCE</button>
+                        <button class="cat-filter font-jetbrains text-xs px-4 py-2 border border-[var(--outline-variant)] transition-all" data-cat="threat-hunting">THREAT HUNTING</button>
+                    </div>
+
+                    <!-- Dynamic Blog Cards Container -->
+                    <div id="blogCards" class="space-y-20 sm:space-y-24">
+                        <!-- Loading state -->
+                        <div id="blogLoading" class="text-center py-20">
+                            <span class="font-jetbrains text-[var(--on-surface-variant)] text-sm animate-pulse">// fetching posts from CMS...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <script>
+                (function() {
+                    const POSTS_URL = 'https://raw.githubusercontent.com/madhavaa07/msk-blog-data/main/posts.json';
+                    const container = document.getElementById('blogCards');
+                    const loading = document.getElementById('blogLoading');
+
+                    const categoryColors = {
+                        'grc': 'bg-primary',
+                        'cloud-security': 'bg-secondary',
+                        'compliance': 'bg-tertiary',
+                        'threat-hunting': 'bg-error',
+                        'iam': 'bg-secondary'
+                    };
+
+                    function formatDate(dateStr) {
+                        const d = new Date(dateStr);
+                        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    }
+
+                    function resolveImage(url, idx) {
+                        if (url && url.startsWith('http')) return url;
+                        return 'https://picsum.photos/600/400?grayscale&random=' + (idx + 10);
+                    }
+
+                    function renderCard(post, idx) {
+                        const colorClass = categoryColors[post.category] || 'bg-primary';
+                        const imgUrl = resolveImage(post.imageUrl, idx);
+                        const catLabel = post.category.replace('-', ' ').toUpperCase();
+
+                        return '<article class="blog-card" data-category="' + post.category + '">' +
+                            '<div class="flex flex-col lg:flex-row gap-6 sm:gap-8 items-stretch">' +
+                                '<div class="w-full lg:w-5/12 h-60 sm:h-72 lg:h-80 overflow-hidden glow-hover">' +
+                                    '<img src="' + imgUrl + '" alt="' + post.title + '" class="card-image w-full h-full object-cover" onerror="this.src=\'https://picsum.photos/600/400?grayscale&random=' + (idx+10) + '\'">' +
+                                '</div>' +
+                                '<div class="flex-1 lg:w-7/12 flex flex-col justify-start gap-4 sm:gap-6">' +
+                                    '<div class="inline-flex w-fit">' +
+                                        '<span class="' + colorClass + ' text-on-primary px-3 py-1 text-xs font-jetbrains font-bold">' + catLabel + '</span>' +
+                                    '</div>' +
+                                    '<div class="font-jetbrains text-on-surface-variant text-xs sm:text-sm">' + formatDate(post.publishedAt) + ' &middot; ' + post.readTime + ' min read</div>' +
+                                    '<h3 class="font-space-grotesk text-2xl sm:text-3xl lg:text-4xl text-on-surface leading-tight hover:text-primary transition-colors">' + post.title + '</h3>' +
+                                    '<p class="text-on-surface-variant text-sm sm:text-base leading-relaxed">' + post.excerpt + '</p>' +
+                                    '<a href="blog-post.html?id=' + post.id + '" class="inline-flex items-center gap-2 w-fit font-space-grotesk text-primary text-sm hover:text-primary-container transition-colors">READ ARTICLE <span class="text-lg">&gt;</span></a>' +
+                                '</div>' +
+                            '</div>' +
+                        '</article>';
+                    }
+
+                    let allPosts = [];
+
+                    fetch(POSTS_URL)
+                        .then(function(r) { return r.json(); })
+                        .then(function(posts) {
+                            allPosts = posts.filter(function(p) { return p.status === 'published'; });
+                            allPosts.sort(function(a, b) { return new Date(b.publishedAt) - new Date(a.publishedAt); });
+                            renderAll('all');
+                        })
+                        .catch(function() {
+                            loading.innerHTML = '<span class="font-jetbrains text-[var(--error)] text-sm">// error loading posts. check network connection.</span>';
+                        });
+
+                    function renderAll(cat) {
+                        var filtered = cat === 'all' ? allPosts : allPosts.filter(function(p) { return p.category === cat; });
+                        var html = '';
+                        filtered.forEach(function(post, i) { html += renderCard(post, i); });
+                        container.innerHTML = html || '<div class="text-center py-20"><span class="font-jetbrains text-[var(--on-surface-variant)] text-sm">// no posts found in this category</span></div>';
+                    }
+
+                    // Category filter buttons
+                    document.querySelectorAll('.cat-filter').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.cat-filter').forEach(function(b) { b.classList.remove('active'); });
+                            btn.classList.add('active');
+                            renderAll(btn.dataset.cat);
+                        });
+                    });
+                })();
+                </script>
+
+                <!-- Footer -->
+                <footer class="px-6 sm:px-8 lg:px-12 py-12 sm:py-16 border-t border-outline-variant/20 bg-surface-container-low/30">
+                    <div class="space-y-8">
+                        <!-- Links Row -->
+                        <div class="flex flex-wrap gap-6 sm:gap-12">
+                            <a href="https://github.com/ogmadhavaa" target="_blank" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">
+                                GITHUB
+                            </a>
+                            <a href="https://www.linkedin.com/in/kolluri-madhava-sai-4587a711a/" target="_blank" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">
+                                LINKEDIN
+                            </a>
+                            <a href="mailto:ogmadhavaa@gmail.com" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">
+                                EMAIL
+                            </a>
+                            <a href="portfolio.html" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">
+                                PORTFOLIO
+                            </a>
+                            <a href="dashboard.html" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors flex items-center gap-1">
+                                <span class="material-symbols-outlined" style="font-size:14px;">dashboard</span>
+                                DASHBOARD
+                            </a>
+                        </div>
+
+                        <!-- Copyright -->
+                        <div class="font-jetbrains text-on-surface-variant text-xs">
+                            © 2024 MSK. All signal patterns intercepted.
+                        </div>
+
+                        <!-- HUD Widgets -->
+                        <div class="flex flex-wrap gap-4 sm:gap-8">
+                            <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-tertiary border border-outline-variant/20">
+                                TZ: UTC-8
+                            </div>
+                            <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-primary border border-outline-variant/20 flex items-center gap-2">
+                                <span class="inline-block w-2 h-2 bg-primary animate-pulse"></span>
+                                ONLINE
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </main>
+    <script src="morph-scroll.js"></script>
+    <script data-goatcounter="https://madhavasai.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSK - Authentication Protocol</title>
+
+    <!-- Google Fonts: Space Grotesk, Inter, JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Tailwind CSS with CDN -->
+    <script src="https://cdn.tailwindcss.config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9cff93",
+                        "primary-container": "#00fc40",
+                        "secondary": "#00bdfd",
+                        "tertiary": "#8af2ff",
+                        "surface": "#0e0e0f",
+                        "surface-container-low": "#131314",
+                        "surface-container": "#1a191b",
+                        "surface-container-high": "#201f21",
+                        "surface-container-highest": "#262627",
+                        "on-surface": "#ffffff",
+                        "on-surface-variant": "#adaaab",
+                        "on-primary": "#006413",
+                        "outline": "#767576",
+                        "outline-variant": "#484849",
+                    },
+                    fontFamily: {
+                        "space-grotesk": ["Space Grotesk", "sans-serif"],
+                        "inter": ["Inter", "sans-serif"],
+                        "jetbrains-mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "none": "0px",
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            border-radius: 0px !important;
+        }
+
+        body {
+            background-color: #0e0e0f;
+            color: #ffffff;
+            font-family: "Inter", sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Grid dot pattern background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle, rgba(72, 72, 73, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: 0 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Blueprint horizontal lines */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(to right, transparent calc(25% - 1px), rgba(156, 255, 147, 0.03) calc(25% - 1px), rgba(156, 255, 147, 0.03) calc(25% + 1px), transparent calc(25% + 1px)),
+                linear-gradient(to right, transparent calc(33% - 1px), rgba(0, 189, 253, 0.03) calc(33% - 1px), rgba(0, 189, 253, 0.03) calc(33% + 1px), transparent calc(33% + 1px));
+            background-size: 100% 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Ambient glow orbs */
+        .glow-orb-green {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(156, 255, 147, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            left: -200px;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb-blue {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 189, 253, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -150px;
+            right: -150px;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Main container */
+        .container-main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Brand header */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .brand-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 64px;
+            font-weight: 700;
+            color: #9cff93;
+            letter-spacing: 2px;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(156, 255, 147, 0.3);
+        }
+
+        .brand-subtitle {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            color: #8af2ff;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 12px 0 0 0;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        /* Login card */
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #131314;
+            border: 1px solid rgba(72, 72, 73, 0.15);
+            box-shadow:
+                0 0 40px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(156, 255, 147, 0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Top accent gradient line */
+        .card-accent {
+            height: 3px;
+            background: linear-gradient(to right, #9cff93, #00bdfd);
+            width: 100%;
+        }
+
+        .card-content {
+            padding: 48px 36px;
+        }
+
+        .card-header h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .card-header p {
+            font-family: "Inter", sans-serif;
+            font-size: 14px;
+            color: #adaaab;
+            margin: 0 0 32px 0;
+        }
+
+        /* Form fields */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #8af2ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .form-label-link {
+            color: #8af2ff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .form-label-link:hover {
+            color: #00fc40;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            color: #9cff93;
+            font-size: 20px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #262627;
+            color: #ffffff;
+            border: none;
+            border-bottom: 2px solid #484849;
+            padding: 12px 12px 12px 40px;
+            font-size: 14px;
+            font-family: "Inter", sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: #767576;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 12px;
+        }
+
+        .form-input:focus {
+            background: #201f21;
+            border-bottom-color: #00bdfd;
+            box-shadow: inset 0 0 20px rgba(0, 189, 253, 0.1);
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 28px;
+            margin-top: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #9cff93;
+            border-radius: 0px;
+        }
+
+        .checkbox-label {
+            font-family: "Inter", sans-serif;
+            font-size: 13px;
+            color: #adaaab;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #9cff93 0%, #00fc40 100%);
+            color: #006413;
+            border: none;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            box-shadow: 0 0 30px rgba(156, 255, 147, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .cta-button:active {
+            transform: translateY(0px);
+        }
+
+        .arrow-icon {
+            transition: transform 0.3s ease;
+            font-size: 16px;
+        }
+
+        .cta-button:hover .arrow-icon {
+            transform: translateX(4px);
+        }
+
+        /* Footer text */
+        .card-footer {
+            text-align: center;
+            font-family: "Inter", sans-serif;
+            font-size: 13px;
+            color: #adaaab;
+            margin-top: 24px;
+            border-top: 1px solid rgba(72, 72, 73, 0.1);
+            padding-top: 24px;
+        }
+
+        .card-footer strong {
+            color: #00bdfd;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .card-footer strong:hover {
+            color: #00fc40;
+        }
+
+        /* System metadata footer */
+        .system-metadata {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 32px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            color: #767576;
+            z-index: 2;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metadata-icon {
+            font-size: 16px;
+            color: #9cff93;
+        }
+
+        /* Side decorations */
+        .side-decoration {
+            position: fixed;
+            bottom: 40px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .side-decoration:hover {
+            opacity: 0.7;
+        }
+
+        .deco-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .deco-line-green {
+            color: #9cff93;
+        }
+
+        .deco-line-blue {
+            color: #00bdfd;
+        }
+
+        .deco-visual {
+            width: 30px;
+            height: 2px;
+        }
+
+        .deco-visual-green {
+            background: #9cff93;
+        }
+
+        .deco-visual-blue {
+            background: #00bdfd;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .brand-title {
+                font-size: 48px;
+            }
+
+            .card-content {
+                padding: 36px 24px;
+            }
+
+            .login-card {
+                max-width: 100%;
+            }
+
+            .system-metadata {
+                font-size: 10px;
+                gap: 16px;
+            }
+
+            .side-decoration {
+                display: none;
+            }
+        }
+
+        /* Remove default input styles */
+        input {
+            border-radius: 0px !important;
+        }
+
+        button {
+            border-radius: 0px !important;
+        }
+
+        /* ===== TERMINAL PRELOADER ===== */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0a0a0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'JetBrains Mono', monospace;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.fade-out { opacity: 0; visibility: hidden; }
+        .preloader-terminal { width: 520px; max-width: 90vw; background: #0e0e0f; border: 1px solid #484849; overflow: hidden; }
+        .preloader-titlebar { background: #131314; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #484849; }
+        .preloader-dot { width: 10px; height: 10px; background: #484849; }
+        .preloader-dot.active { background: #9cff93; }
+        .preloader-titlebar span { font-size: 10px; color: #767576; letter-spacing: 2px; text-transform: uppercase; margin-left: auto; }
+        .preloader-body { padding: 20px; min-height: 220px; }
+        .preloader-line { display: flex; gap: 8px; margin-bottom: 6px; font-size: 12px; line-height: 1.8; opacity: 0; transform: translateY(4px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .preloader-line.visible { opacity: 1; transform: translateY(0); }
+        .preloader-line .prompt { color: #9cff93; white-space: nowrap; }
+        .preloader-line .cmd { color: #adaaab; }
+        .preloader-line .status-ok { color: #9cff93; }
+        .preloader-line .status-load { color: #00bdfd; }
+        .preloader-line .status-warn { color: #8af2ff; }
+        .preloader-ascii { margin-top: 16px; text-align: center; font-size: 14px; line-height: 1.3; color: #9cff93; opacity: 0; transform: scale(0.95); transition: opacity 0.5s ease, transform 0.5s ease; text-shadow: 0 0 20px rgba(156,255,147,0.4); }
+        .preloader-ascii.visible { opacity: 1; transform: scale(1); }
+        .preloader-progress { margin-top: 16px; height: 2px; background: #262627; overflow: hidden; }
+        .preloader-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #9cff93, #00fc40); transition: width 0.3s ease; }
+        @keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .preloader-cursor { display: inline-block; width: 7px; height: 14px; background: #9cff93; margin-left: 2px; vertical-align: middle; animation: cursor-blink 0.8s step-end infinite; }
+    </style>
+</head>
+<body>
+    <!-- ===== TERMINAL PRELOADER ===== -->
+    <div id="preloader">
+        <div class="preloader-terminal">
+            <div class="preloader-titlebar">
+                <div class="preloader-dot active"></div>
+                <div class="preloader-dot"></div>
+                <div class="preloader-dot"></div>
+                <span>msk_terminal v2.4</span>
+            </div>
+            <div class="preloader-body" id="preloaderBody">
+                <div class="preloader-line" data-delay="100">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">initializing auth protocol...<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-line" data-delay="500">
+                    <span class="prompt">[SEC]</span>
+                    <span class="cmd">loading encryption layer</span>
+                    <span class="status-ok">[OK]</span>
+                </div>
+                <div class="preloader-line" data-delay="900">
+                    <span class="prompt">[TLS]</span>
+                    <span class="cmd">establishing secure channel</span>
+                    <span class="status-load">[TLS_1.3]</span>
+                </div>
+                <div class="preloader-line" data-delay="1300">
+                    <span class="prompt">[AUTH]</span>
+                    <span class="cmd">preparing identity gateway</span>
+                    <span class="status-ok">[READY]</span>
+                </div>
+                <div class="preloader-line" data-delay="1700">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">launch --auth-portal<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-ascii" id="preloaderAscii">
+<pre>
+ ███╗   ███╗ ███████╗ ██╗  ██╗
+ ████╗ ████║ ██╔════╝ ██║ ██╔╝
+ ██╔████╔██║ ███████╗ █████╔╝
+ ██║╚██╔╝██║ ╚════██║ ██╔═██╗
+ ██║ ╚═╝ ██║ ███████║ ██║  ██╗
+ ╚═╝     ╚═╝ ╚══════╝ ╚═╝  ╚═╝
+</pre>
+                </div>
+                <div class="preloader-progress">
+                    <div class="preloader-progress-bar" id="preloaderBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        const lines = document.querySelectorAll('#preloaderBody .preloader-line');
+        const ascii = document.getElementById('preloaderAscii');
+        const bar = document.getElementById('preloaderBar');
+        const preloader = document.getElementById('preloader');
+        lines.forEach(line => {
+            const delay = parseInt(line.getAttribute('data-delay'));
+            setTimeout(() => { line.classList.add('visible'); bar.style.width = Math.min((delay / 2800) * 100, 85) + '%'; }, delay);
+        });
+        setTimeout(() => { ascii.classList.add('visible'); bar.style.width = '100%'; }, 2200);
+        setTimeout(() => { preloader.classList.add('fade-out'); }, 2800);
+        setTimeout(() => { preloader.style.display = 'none'; }, 3400);
+    })();
+    </script>
+
+    <!-- Ambient glow orbs -->
+    <div class="glow-orb-green"></div>
+    <div class="glow-orb-blue"></div>
+
+    <!-- Main container -->
+    <div class="container-main">
+        <!-- Brand header -->
+        <div class="brand-header">
+            <a href="portfolio.html" class="brand-title" style="text-decoration:none;color:inherit;">MSK</a>
+            <p class="brand-subtitle">AUTHENTICATION PROTOCOL V2.4</p>
+        </div>
+
+        <!-- Login card -->
+        <div class="login-card">
+            <div class="card-accent"></div>
+
+            <div class="card-content">
+                <!-- Card header -->
+                <div class="card-header">
+                    <h1>Welcome Back</h1>
+                    <p>Access your secure workspace.</p>
+                </div>
+
+                <!-- Login form -->
+                <form id="loginForm">
+                    <!-- Username field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Operator Identity</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <span class="material-symbols-outlined">person</span>
+                            </span>
+                            <input
+                                type="text"
+                                id="usernameField"
+                                class="form-input"
+                                placeholder="enter_operator_id"
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Security Cipher</span>
+                            <a href="#" class="form-label-link">LOST_CREDENTIALS?</a>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <span class="material-symbols-outlined">lock</span>
+                            </span>
+                            <input
+                                type="password"
+                                id="passwordField"
+                                class="form-input"
+                                placeholder="••••••••••••••••"
+                                required
+                                autocomplete="current-password"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Persistent session checkbox -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="persistentSession">
+                        <label for="persistentSession" class="checkbox-label">Persistent session</label>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <button type="submit" class="cta-button">
+                        <span>Initialize Session</span>
+                        <span class="arrow-icon">→</span>
+                    </button>
+                </form>
+
+                <!-- Footer text -->
+                <div class="card-footer">
+                    New Operator? <strong>Request Access</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System metadata footer -->
+    <div class="system-metadata">
+        <div class="metadata-item">
+            <span class="metadata-icon">
+                <span class="material-symbols-outlined">shield</span>
+            </span>
+            <span>SECURE_TLS_1.3</span>
+        </div>
+        <div class="metadata-item">
+            <span>NODE_04 // SEOUL</span>
+        </div>
+        <div class="metadata-item">
+            <span>LATENCY: 14MS</span>
+        </div>
+    </div>
+
+    <!-- Side decorations (desktop only) -->
+    <div class="side-decoration">
+        <div class="deco-line deco-line-green">
+            <div class="deco-visual deco-visual-green"></div>
+            <span>BUILD_LOG_001</span>
+        </div>
+        <div class="deco-line deco-line-blue">
+            <div class="deco-visual deco-visual-blue"></div>
+            <span>SCHEMATIC_VIEW</span>
+        </div>
+    </div>
+
+    <style>
+        /* Error / success toast */
+        .auth-toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            padding: 14px 28px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            z-index: 9999;
+            border: 1px solid;
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+        .auth-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .auth-toast.error {
+            background: rgba(255, 60, 60, 0.12);
+            border-color: rgba(255, 60, 60, 0.4);
+            color: #ff6b6b;
+        }
+        .auth-toast.success {
+            background: rgba(156, 255, 147, 0.12);
+            border-color: rgba(156, 255, 147, 0.4);
+            color: #9cff93;
+        }
+        /* Input error shake */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .input-error { animation: shake 0.4s ease; }
+        .input-error .form-input { border-bottom-color: #ff6b6b !important; }
+    </style>
+
+    <div class="auth-toast" id="authToast"></div>
+
+    <script>
+        // Seeded credentials (hashed for minimal obfuscation)
+        const _k = atob('bWFkaGF2YWE=');    // madhavaa
+        const _v = atob('WXRzYW5AMjAyNg=='); // Ytsan@2026
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('authToast');
+            toast.textContent = msg;
+            toast.className = 'auth-toast ' + type;
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        // Form submission handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('usernameField').value.trim();
+            const password = document.getElementById('passwordField').value;
+            const persistent = document.getElementById('persistentSession').checked;
+            const button = document.querySelector('.cta-button');
+
+            // Visual feedback — initializing
+            button.innerHTML = '<span>INITIALIZING...</span>';
+            button.disabled = true;
+            button.style.opacity = '0.7';
+
+            setTimeout(() => {
+                if (username === _k && password === _v) {
+                    // SUCCESS
+                    button.innerHTML = '<span style="color:#006413">ACCESS GRANTED</span>';
+                    button.style.opacity = '1';
+                    showToast('Authentication successful — redirecting...', 'success');
+
+                    // Store session
+                    if (persistent) {
+                        localStorage.setItem('msk_auth', JSON.stringify({
+                            user: username,
+                            ts: Date.now(),
+                            persistent: true
+                        }));
+                    } else {
+                        sessionStorage.setItem('msk_auth', JSON.stringify({
+                            user: username,
+                            ts: Date.now()
+                        }));
+                    }
+
+                    // Redirect to dashboard after brief pause
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1200);
+                } else {
+                    // FAILED
+                    button.innerHTML = '<span style="color:#ff6b6b">ACCESS DENIED</span>';
+                    button.style.opacity = '1';
+                    showToast('Invalid credentials — access denied', 'error');
+
+                    // Shake the inputs
+                    document.querySelectorAll('.form-group').forEach(g => {
+                        g.classList.add('input-error');
+                        setTimeout(() => g.classList.remove('input-error'), 500);
+                    });
+
+                    // Reset button
+                    setTimeout(() => {
+                        button.innerHTML = '<span>Initialize Session</span><span class="arrow-icon">→</span>';
+                        button.disabled = false;
+                        button.style.opacity = '1';
+                    }, 2000);
+                }
+            }, 1500);
+        });
+
+        // Prevent form label link from refreshing page
+        document.querySelector('.form-label-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            showToast('Recovery protocol not available', 'error');
+        });
+
+        // Request Access link
+        document.querySelector('.card-footer strong').addEventListener('click', function(e) {
+            e.preventDefault();
+            showToast('Access requests are closed', 'error');
+        });
+    </script>
+    <script src="morph-scroll.js"></script>
+</body>
+</html>

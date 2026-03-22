@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MSK</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --primary: #9cff93;
+            --primary-container: #00fc40;
+            --secondary: #00bdfd;
+            --tertiary: #8af2ff;
+            --surface: #0e0e0f;
+            --surface-container-low: #131314;
+            --surface-container: #1a191b;
+            --surface-container-high: #201f21;
+            --surface-container-highest: #262627;
+            --on-surface: #ffffff;
+            --on-surface-variant: #adaaab;
+            --on-primary: #006413;
+            --outline: #767576;
+            --outline-variant: #484849;
+            --error: #ff7351;
+        }
+
+        * { border-radius: 0px !important; }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Grid Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(0deg, rgba(72,72,73,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(72,72,73,0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        a, button { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+        .font-space-grotesk {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+        .font-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* Navigation — consistent with portfolio */
+        .msk-nav-link {
+            position: relative;
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+        .msk-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background-color: #9cff93;
+            transition: width 0.3s ease;
+        }
+        .msk-nav-link:hover::after { width: 100%; }
+        .msk-nav-link:hover { color: #9cff93; }
+        .msk-nav-active { color: #9cff93; }
+        .msk-nav-active::after { width: 100% !important; }
+
+        /* Sidebar */
+        .sidebar-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 0;
+            width: 100%;
+            cursor: pointer;
+            color: #adaaab;
+            transition: all 0.3s ease;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            position: relative;
+        }
+        .sidebar-icon .material-symbols-outlined { font-size: 20px; }
+        .sidebar-icon.active { color: #9cff93; }
+        .sidebar-icon.active::before {
+            content: '';
+            position: absolute;
+            right: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 2px; height: 70%;
+            background: #9cff93;
+            box-shadow: 0 0 8px rgba(156,255,147,0.4);
+        }
+        .sidebar-icon:hover { color: #9cff93; }
+
+        /* Ghost Borders */
+        .ghost-border { border: 1px solid rgba(72,72,73,0.15); }
+
+        /* Stat Cards */
+        .stat-card {
+            background: var(--surface-container-low);
+            border: 1px solid rgba(72,72,73,0.15);
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(156,255,147,0.3);
+            box-shadow: 0 0 20px rgba(156,255,147,0.08);
+        }
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--on-surface-variant);
+            margin-top: 8px;
+        }
+        .stat-delta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Dashboard Tabs */
+        .dash-tab {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 10px 20px;
+            color: var(--on-surface-variant);
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dash-tab:hover { color: var(--primary); }
+        .dash-tab.active {
+            color: var(--primary);
+            background: rgba(156,255,147,0.06);
+            border-color: rgba(156,255,147,0.2);
+        }
+
+        /* Post Table */
+        .post-table { width: 100%; border-collapse: collapse; }
+        .post-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--on-surface-variant);
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(72,72,73,0.2);
+        }
+        .post-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(72,72,73,0.1);
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+        .post-table tr:hover td { background: rgba(156,255,147,0.03); }
+
+        .status-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-published {
+            color: var(--primary);
+            background: rgba(156,255,147,0.1);
+            border: 1px solid rgba(156,255,147,0.2);
+        }
+        .status-draft {
+            color: var(--tertiary);
+            background: rgba(138,242,255,0.1);
+            border: 1px solid rgba(138,242,255,0.2);
+        }
+
+        .action-btn {
+            padding: 6px;
+            color: var(--on-surface-variant);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .action-btn:hover { color: var(--primary); }
+        .action-btn.delete:hover { color: var(--error); }
+
+        /* Editor */
+        .editor-area {
+            width: 100%;
+            min-height: 320px;
+            background: var(--surface-container-highest);
+            border: 1px solid rgba(72,72,73,0.2);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            padding: 20px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .editor-area:focus { border-color: rgba(0,189,253,0.5); }
+
+        .editor-input {
+            width: 100%;
+            background: var(--surface-container-highest);
+            border: none;
+            border-bottom: 2px solid var(--outline-variant);
+            color: var(--on-surface);
+            padding: 12px 0;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .editor-input:focus { border-bottom-color: var(--secondary); }
+        .editor-input::placeholder { color: var(--outline); }
+        .editor-input.title-input {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed rgba(72,72,73,0.3);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(19,19,20,0.5);
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: rgba(156,255,147,0.5);
+            background: rgba(156,255,147,0.03);
+        }
+
+        .media-thumb {
+            width: 80px; height: 80px;
+            object-fit: cover;
+            border: 1px solid rgba(72,72,73,0.2);
+        }
+
+        /* Toolbar */
+        .editor-toolbar {
+            display: flex;
+            gap: 2px;
+            padding: 8px;
+            background: var(--surface-container-low);
+            border: 1px solid rgba(72,72,73,0.15);
+            border-bottom: none;
+            flex-wrap: wrap;
+        }
+        .toolbar-btn {
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--on-surface-variant);
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toolbar-btn:hover {
+            color: var(--primary);
+            background: rgba(156,255,147,0.08);
+        }
+
+        /* CTA green button */
+        .btn-primary {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #9cff93 0%, #00fc40 100%);
+            color: #006413;
+            border: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 24px rgba(156,255,147,0.35);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            padding: 12px 28px;
+            background: transparent;
+            color: var(--on-surface-variant);
+            border: 1px solid rgba(72,72,73,0.3);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            border-color: rgba(156,255,147,0.4);
+            color: var(--primary);
+        }
+
+        /* Toast */
+        .dash-toast {
+            position: fixed;
+            top: 24px; right: 24px;
+            padding: 14px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            z-index: 9999;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .dash-toast.show { transform: translateX(0); opacity: 1; }
+        .dash-toast.success {
+            background: rgba(156,255,147,0.12);
+            border: 1px solid rgba(156,255,147,0.3);
+            color: var(--primary);
+        }
+        .dash-toast.error {
+            background: rgba(255,60,60,0.12);
+            border: 1px solid rgba(255,60,60,0.3);
+            color: #ff6b6b;
+        }
+        .dash-toast.info {
+            background: rgba(0,189,253,0.12);
+            border: 1px solid rgba(0,189,253,0.3);
+            color: var(--secondary);
+        }
+
+        /* Auth overlay */
+        #authOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        #authOverlay.hidden { display: none; }
+
+        main { position: relative; z-index: 1; }
+
+        /* ===== TERMINAL PRELOADER ===== */
+        #preloader {
+            position: fixed; inset: 0;
+            z-index: 99999;
+            background: #0a0a0b;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            font-family: 'JetBrains Mono', monospace;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.fade-out { opacity: 0; visibility: hidden; }
+        .preloader-terminal { width: 520px; max-width: 90vw; background: #0e0e0f; border: 1px solid #484849; overflow: hidden; }
+        .preloader-titlebar { background: #131314; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #484849; }
+        .preloader-dot { width: 10px; height: 10px; background: #484849; }
+        .preloader-dot.active { background: #9cff93; }
+        .preloader-titlebar span { font-size: 10px; color: #767576; letter-spacing: 2px; text-transform: uppercase; margin-left: auto; }
+        .preloader-body { padding: 20px; min-height: 220px; }
+        .preloader-line { display: flex; gap: 8px; margin-bottom: 6px; font-size: 12px; line-height: 1.8; opacity: 0; transform: translateY(4px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .preloader-line.visible { opacity: 1; transform: translateY(0); }
+        .preloader-line .prompt { color: #9cff93; white-space: nowrap; }
+        .preloader-line .cmd { color: #adaaab; }
+        .preloader-line .status-ok { color: #9cff93; }
+        .preloader-line .status-load { color: #00bdfd; }
+        .preloader-line .status-warn { color: #8af2ff; }
+        .preloader-ascii { margin-top: 16px; text-align: center; font-size: 14px; line-height: 1.3; color: #9cff93; opacity: 0; transform: scale(0.95); transition: opacity 0.5s ease, transform 0.5s ease; text-shadow: 0 0 20px rgba(156,255,147,0.4); }
+        .preloader-ascii.visible { opacity: 1; transform: scale(1); }
+        .preloader-progress { margin-top: 16px; height: 2px; background: #262627; overflow: hidden; }
+        .preloader-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #9cff93, #00fc40); transition: width 0.3s ease; }
+        @keyframes cursor-blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+        .preloader-cursor { display: inline-block; width: 7px; height: 14px; background: #9cff93; margin-left: 2px; vertical-align: middle; animation: cursor-blink 0.8s step-end infinite; }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#9cff93',
+                        'primary-container': '#00fc40',
+                        'secondary': '#00bdfd',
+                        'tertiary': '#8af2ff',
+                        'surface': '#0e0e0f',
+                        'surface-container-low': '#131314',
+                        'surface-container': '#1a191b',
+                        'surface-container-high': '#201f21',
+                        'surface-container-highest': '#262627',
+                        'on-surface': '#ffffff',
+                        'on-surface-variant': '#adaaab',
+                        'on-primary': '#006413',
+                        'outline': '#767576',
+                        'outline-variant': '#484849',
+                        'error': '#ff7351',
+                    },
+                    fontFamily: {
+                        'space-grotesk': ['Space Grotesk', 'sans-serif'],
+                        'jetbrains': ['JetBrains Mono', 'monospace'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface">
+    <!-- ===== TERMINAL PRELOADER ===== -->
+    <div id="preloader">
+        <div class="preloader-terminal">
+            <div class="preloader-titlebar">
+                <div class="preloader-dot active"></div>
+                <div class="preloader-dot"></div>
+                <div class="preloader-dot"></div>
+                <span>msk_terminal v2.4</span>
+            </div>
+            <div class="preloader-body" id="preloaderBody">
+                <div class="preloader-line" data-delay="100">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">initializing dashboard...<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-line" data-delay="500">
+                    <span class="prompt">[AUTH]</span>
+                    <span class="cmd">verifying session token</span>
+                    <span class="status-ok">[VALID]</span>
+                </div>
+                <div class="preloader-line" data-delay="900">
+                    <span class="prompt">[DB]</span>
+                    <span class="cmd">loading post registry</span>
+                    <span class="status-load">[SYNCED]</span>
+                </div>
+                <div class="preloader-line" data-delay="1300">
+                    <span class="prompt">[SYS]</span>
+                    <span class="cmd">mounting editor modules</span>
+                    <span class="status-ok">[READY]</span>
+                </div>
+                <div class="preloader-line" data-delay="1700">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">launch --dashboard<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-ascii" id="preloaderAscii">
+<pre>
+ ███╗   ███╗ ███████╗ ██╗  ██╗
+ ████╗ ████║ ██╔════╝ ██║ ██╔╝
+ ██╔████╔██║ ███████╗ █████╔╝
+ ██║╚██╔╝██║ ╚════██║ ██╔═██╗
+ ██║ ╚═╝ ██║ ███████║ ██║  ██╗
+ ╚═╝     ╚═╝ ╚══════╝ ╚═╝  ╚═╝
+</pre>
+                </div>
+                <div class="preloader-progress">
+                    <div class="preloader-progress-bar" id="preloaderBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        const lines = document.querySelectorAll('#preloaderBody .preloader-line');
+        const ascii = document.getElementById('preloaderAscii');
+        const bar = document.getElementById('preloaderBar');
+        const preloader = document.getElementById('preloader');
+        lines.forEach(line => {
+            const delay = parseInt(line.getAttribute('data-delay'));
+            setTimeout(() => { line.classList.add('visible'); bar.style.width = Math.min((delay/2800)*100,85)+'%'; }, delay);
+        });
+        setTimeout(() => { ascii.classList.add('visible'); bar.style.width='100%'; }, 2200);
+        setTimeout(() => { preloader.classList.add('fade-out'); }, 2800);
+        setTimeout(() => { preloader.style.display='none'; }, 3400);
+    })();
+    </script>
+
+    <!-- Auth Overlay (shown if not authenticated) -->
+    <div id="authOverlay">
+        <span class="material-symbols-outlined" style="font-size:48px;color:#ff7351;margin-bottom:16px;">shield_lock</span>
+        <p style="color:#ff7351;font-size:14px;letter-spacing:2px;text-transform:uppercase;">ACCESS DENIED</p>
+        <p style="color:#767576;font-size:11px;margin-top:8px;letter-spacing:1px;">REDIRECTING TO AUTH PORTAL...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="dash-toast" id="dashToast"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50" style="background:rgba(14,14,15,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(72,72,73,0.15);">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="portfolio.html" class="font-space-grotesk text-2xl font-bold text-primary hover:text-primary-container transition-colors" style="text-decoration:none;">MSK.</a>
+            <div class="hidden md:flex gap-8 items-center">
+                <a href="portfolio.html#experience" class="msk-nav-link">Experience</a>
+                <a href="portfolio.html#about" class="msk-nav-link">About</a>
+                <a href="portfolio.html#skills" class="msk-nav-link">Skills</a>
+                <a href="portfolio.html#projects" class="msk-nav-link">Projects</a>
+                <a href="blog.html" class="msk-nav-link">Blog</a>
+                <a href="portfolio.html#contact" class="msk-nav-link">Contact</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="font-jetbrains text-xs text-tertiary hidden sm:block" id="sessionUser"></span>
+                <button onclick="logout()" class="p-2 hover:text-error transition-colors" title="Logout">
+                    <span class="material-symbols-outlined text-xl" style="color:#adaaab;">logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20" id="dashboardContent" style="display:none;">
+        <div class="flex">
+            <!-- Left Sidebar -->
+            <aside class="hidden lg:flex flex-col items-center w-20 bg-surface-container-low border-r border-outline-variant/20 min-h-screen py-8 gap-4 fixed left-0 top-16 z-40 justify-center">
+                <a href="portfolio.html#experience" class="sidebar-icon" title="Experience">
+                    <span class="material-symbols-outlined">work_history</span>
+                    <span>Exp</span>
+                </a>
+                <a href="portfolio.html#about" class="sidebar-icon" title="About">
+                    <span class="material-symbols-outlined">person</span>
+                    <span>About</span>
+                </a>
+                <a href="portfolio.html#skills" class="sidebar-icon" title="Skills">
+                    <span class="material-symbols-outlined">terminal</span>
+                    <span>Skills</span>
+                </a>
+                <a href="portfolio.html#projects" class="sidebar-icon" title="Projects">
+                    <span class="material-symbols-outlined">folder_code</span>
+                    <span>Projects</span>
+                </a>
+                <a href="blog.html" class="sidebar-icon" title="Blog">
+                    <span class="material-symbols-outlined">article</span>
+                    <span>Blog</span>
+                </a>
+                <a href="portfolio.html#contact" class="sidebar-icon" title="Contact">
+                    <span class="material-symbols-outlined">send</span>
+                    <span>Contact</span>
+                </a>
+            </aside>
+
+            <!-- Page Content -->
+            <div class="flex-1 lg:ml-20">
+                <!-- Page Header -->
+                <header class="px-6 sm:px-8 lg:px-12 py-10 border-b border-outline-variant/20">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <div class="font-jetbrains text-primary text-xs mb-2">// CONTROL_PANEL</div>
+                            <h1 class="font-space-grotesk text-3xl sm:text-4xl">BLOG DASHBOARD</h1>
+                            <p class="text-on-surface-variant text-sm mt-2">Manage posts, media, and analytics from one terminal.</p>
+                        </div>
+                        <button class="btn-primary flex items-center gap-2" onclick="switchTab('editor')">
+                            <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+                            NEW POST
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Analytics Cards -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between">
+                                <span class="material-symbols-outlined" style="color:var(--primary);font-size:28px;">article</span>
+                                <span class="stat-delta" style="color:var(--primary);" id="statPostsDelta"></span>
+                            </div>
+                            <div class="stat-value text-on-surface mt-4" id="statTotalPosts">6</div>
+                            <div class="stat-label">TOTAL POSTS</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between">
+                                <span class="material-symbols-outlined" style="color:var(--secondary);font-size:28px;">visibility</span>
+                                <span class="stat-delta" style="color:var(--primary);" id="statViewsDelta"></span>
+                            </div>
+                            <div class="stat-value text-on-surface mt-4" id="statTotalViews">—</div>
+                            <div class="stat-label">TOTAL VIEWS</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between">
+                                <span class="material-symbols-outlined" style="color:var(--tertiary);font-size:28px;">edit_note</span>
+                            </div>
+                            <div class="stat-value text-on-surface mt-4" id="statDrafts">2</div>
+                            <div class="stat-label">DRAFTS</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between">
+                                <span class="material-symbols-outlined" style="color:var(--primary);font-size:28px;">image</span>
+                            </div>
+                            <div class="stat-value text-on-surface mt-4" id="statMedia">0</div>
+                            <div class="stat-label">MEDIA FILES</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab Navigation -->
+                <section class="px-6 sm:px-8 lg:px-12 border-b border-outline-variant/20">
+                    <div class="flex gap-1 overflow-x-auto">
+                        <button class="dash-tab active" data-tab="posts" onclick="switchTab('posts')">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">list</span>
+                            All Posts
+                        </button>
+                        <button class="dash-tab" data-tab="editor" onclick="switchTab('editor')">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">edit</span>
+                            Editor
+                        </button>
+                        <button class="dash-tab" data-tab="media" onclick="switchTab('media')">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">photo_library</span>
+                            Media
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ============ TAB: ALL POSTS ============ -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8" id="tab-posts">
+                    <div class="overflow-x-auto" style="background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);">
+                        <table class="post-table" id="postsTable">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Views</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postsTableBody">
+                                <!-- populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ============ TAB: EDITOR ============ -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8" id="tab-editor" style="display:none;">
+                    <div class="max-w-4xl">
+                        <!-- Title -->
+                        <input type="text" class="editor-input title-input" placeholder="Post title..." id="editorTitle">
+
+                        <!-- Tags -->
+                        <div class="mt-6 flex flex-wrap items-center gap-3">
+                            <span class="font-jetbrains text-xs text-on-surface-variant uppercase" style="letter-spacing:0.1em;">Tags:</span>
+                            <div class="flex flex-wrap gap-2" id="editorTags"></div>
+                            <input type="text" class="editor-input" style="font-size:0.8rem;width:160px;padding:6px 0;" placeholder="Add tag..." id="editorTagInput">
+                        </div>
+
+                        <!-- Featured Image -->
+                        <div class="mt-6">
+                            <span class="font-jetbrains text-xs text-on-surface-variant uppercase" style="letter-spacing:0.1em;">Featured Image:</span>
+                            <div class="mt-2 upload-zone" id="featuredImageZone" onclick="document.getElementById('featuredImageInput').click()">
+                                <span class="material-symbols-outlined" style="font-size:36px;color:var(--outline);">cloud_upload</span>
+                                <p class="font-jetbrains text-xs text-on-surface-variant mt-2" style="letter-spacing:0.05em;">DROP IMAGE OR CLICK TO UPLOAD</p>
+                                <input type="file" id="featuredImageInput" accept="image/*" style="display:none;">
+                            </div>
+                            <div id="featuredImagePreview" class="mt-2" style="display:none;">
+                                <img id="featuredImageThumb" class="media-thumb" style="width:200px;height:120px;" alt="Featured">
+                                <button class="action-btn delete mt-1" onclick="removeFeaturedImage()" title="Remove">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Toolbar -->
+                        <div class="editor-toolbar mt-6">
+                            <button class="toolbar-btn" onclick="insertMd('**','**')" title="Bold"><span class="material-symbols-outlined">format_bold</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('*','*')" title="Italic"><span class="material-symbols-outlined">format_italic</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('## ','')" title="Heading"><span class="material-symbols-outlined">title</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('> ','')" title="Quote"><span class="material-symbols-outlined">format_quote</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('```\n','\n```')" title="Code Block"><span class="material-symbols-outlined">code</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('- ','')" title="List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('[','](url)')" title="Link"><span class="material-symbols-outlined">link</span></button>
+                            <button class="toolbar-btn" onclick="insertMd('![alt](',')')" title="Image"><span class="material-symbols-outlined">image</span></button>
+                        </div>
+
+                        <!-- Content Area -->
+                        <textarea class="editor-area" id="editorContent" placeholder="Write your post content in Markdown..."></textarea>
+
+                        <!-- Actions -->
+                        <div class="flex gap-4 mt-6 flex-wrap">
+                            <button class="btn-primary" onclick="savePost('published')">
+                                <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">publish</span>
+                                PUBLISH
+                            </button>
+                            <button class="btn-secondary" onclick="savePost('draft')">
+                                <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">save</span>
+                                SAVE DRAFT
+                            </button>
+                            <button class="btn-secondary" onclick="clearEditor()">CLEAR</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============ TAB: MEDIA ============ -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8" id="tab-media" style="display:none;">
+                    <div class="upload-zone" id="mediaUploadZone" onclick="document.getElementById('mediaInput').click()">
+                        <span class="material-symbols-outlined" style="font-size:48px;color:var(--outline);">cloud_upload</span>
+                        <p class="font-jetbrains text-sm text-on-surface-variant mt-3" style="letter-spacing:0.05em;">DROP FILES HERE OR CLICK TO UPLOAD</p>
+                        <p class="font-jetbrains text-xs text-outline mt-1">PNG, JPG, GIF, SVG, WEBP — MAX 10MB</p>
+                        <input type="file" id="mediaInput" accept="image/*" multiple style="display:none;">
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="mediaGrid">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <div id="mediaEmpty" class="text-center py-16">
+                        <span class="material-symbols-outlined" style="font-size:48px;color:var(--outline-variant);">photo_library</span>
+                        <p class="font-jetbrains text-xs text-on-surface-variant mt-4" style="letter-spacing:0.08em;">NO MEDIA FILES UPLOADED YET</p>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer class="px-6 sm:px-8 lg:px-12 py-12 sm:py-16 border-t border-outline-variant/20 bg-surface-container-low/30">
+                    <div class="space-y-8">
+                        <div class="flex flex-wrap gap-6 sm:gap-12">
+                            <a href="https://github.com/ogmadhavaa" target="_blank" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">GITHUB</a>
+                            <a href="https://www.linkedin.com/in/kolluri-madhava-sai-4587a711a/" target="_blank" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">LINKEDIN</a>
+                            <a href="mailto:ogmadhavaa@gmail.com" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">EMAIL</a>
+                            <a href="portfolio.html" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">PORTFOLIO</a>
+                            <a href="blog.html" class="font-jetbrains text-on-surface-variant text-xs hover:text-primary transition-colors">BLOG</a>
+                        </div>
+                        <div class="font-jetbrains text-on-surface-variant text-xs">© 2024 MSK. All signal patterns intercepted.</div>
+                        <div class="flex flex-wrap gap-4 sm:gap-8">
+                            <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-tertiary border border-outline-variant/20">TZ: UTC-8</div>
+                            <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-primary border border-outline-variant/20 flex items-center gap-2">
+                                <span class="inline-block w-2 h-2 bg-primary animate-pulse"></span>
+                                ONLINE
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    /* ═══════════════════════════════════════════
+       AUTH GUARD
+    ═══════════════════════════════════════════ */
+    (function authGuard() {
+        const overlay = document.getElementById('authOverlay');
+        const content = document.getElementById('dashboardContent');
+        const userEl = document.getElementById('sessionUser');
+
+        let session = null;
+        try {
+            session = JSON.parse(sessionStorage.getItem('msk_auth')) || JSON.parse(localStorage.getItem('msk_auth'));
+        } catch(e) {}
+
+        if (!session || !session.user) {
+            overlay.classList.remove('hidden');
+            content.style.display = 'none';
+            setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+            return;
+        }
+
+        overlay.classList.add('hidden');
+        content.style.display = 'block';
+        userEl.textContent = 'operator: ' + session.user;
+    })();
+
+    function logout() {
+        sessionStorage.removeItem('msk_auth');
+        localStorage.removeItem('msk_auth');
+        window.location.href = 'login.html';
+    }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    function showToast(msg, type) {
+        const t = document.getElementById('dashToast');
+        t.textContent = msg;
+        t.className = 'dash-toast ' + type;
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    /* ═══════════════════════════════════════════
+       TAB SWITCHING
+    ═══════════════════════════════════════════ */
+    function switchTab(tab) {
+        document.querySelectorAll('[id^="tab-"]').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('active'));
+        const panel = document.getElementById('tab-' + tab);
+        const btn = document.querySelector('.dash-tab[data-tab="'+tab+'"]');
+        if (panel) panel.style.display = 'block';
+        if (btn) btn.classList.add('active');
+    }
+
+    /* ═══════════════════════════════════════════
+       BLOG POSTS DATA (in-memory store)
+    ═══════════════════════════════════════════ */
+    const POSTS_URL = 'https://raw.githubusercontent.com/madhavaa07/msk-blog-data/main/posts.json';
+    const GC_API = 'https://madhavasai.goatcounter.com/counter/';
+    let posts = [];
+    let editingPostId = null;
+    let mediaFiles = [];
+
+    // Fetch real posts from GitHub CMS, then fetch real views from Goatcounter
+    fetch(POSTS_URL)
+        .then(r => r.json())
+        .then(data => {
+            posts = data.map((p, i) => ({
+                id: i + 1,
+                cmsId: p.id,
+                title: p.title,
+                status: p.status || 'published',
+                date: p.publishedAt ? p.publishedAt.split('T')[0] : p.createdAt ? p.createdAt.split('T')[0] : '—',
+                views: 0,
+                tags: p.tags || [],
+                category: p.category || '',
+                readTime: p.readTime || 5
+            }));
+            renderPosts();
+            // Fetch real pageview data from Goatcounter
+            fetchGoatcounterViews();
+        })
+        .catch(() => {
+            document.getElementById('postsTableBody').innerHTML = '<tr><td colspan="5" class="font-jetbrains text-xs text-error" style="text-align:center;padding:24px;">// failed to fetch posts from CMS</td></tr>';
+        });
+
+    // Goatcounter: fetch real blog post views only
+    function fetchGoatcounterViews() {
+        // Fetch per-post views for each blog post (blog-post.html?id=xxx)
+        var postFetches = posts.map(function(post) {
+            var postPath = '/blog-post.html?id=' + post.cmsId;
+            return fetch(GC_API + encodeURIComponent(postPath) + '.json')
+                .then(function(r) { return r.ok ? r.json() : { count: '0' }; })
+                .then(function(data) {
+                    post.views = parseInt((data.count || '0').toString().replace(/,/g, ''), 10) || 0;
+                    return post.views;
+                })
+                .catch(function() { return 0; });
+        });
+
+        // Also fetch the blog listing page views
+        var blogListFetch = fetch(GC_API + encodeURIComponent('/blog.html') + '.json')
+            .then(function(r) { return r.ok ? r.json() : { count: '0' }; })
+            .then(function(data) { return parseInt((data.count || '0').toString().replace(/,/g, ''), 10) || 0; })
+            .catch(function() { return 0; });
+
+        Promise.all([Promise.all(postFetches), blogListFetch]).then(function(results) {
+            var postViews = results[0];
+            var listViews = results[1];
+            var totalBlogViews = postViews.reduce(function(s, v) { return s + v; }, 0) + listViews;
+
+            // Re-render table with real per-post views
+            renderPosts();
+
+            // Update total views stat card (blog views only)
+            var viewsEl = document.getElementById('statTotalViews');
+            if (viewsEl) {
+                viewsEl.textContent = totalBlogViews >= 1000
+                    ? (totalBlogViews / 1000).toFixed(1) + 'K'
+                    : totalBlogViews.toString();
+            }
+
+            // Update views delta
+            var viewsDelta = document.getElementById('statViewsDelta');
+            if (viewsDelta && totalBlogViews > 0) {
+                viewsDelta.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">trending_up</span> ' + totalBlogViews + ' blog views';
+            } else if (viewsDelta) {
+                viewsDelta.innerHTML = '<span class="font-jetbrains text-xs" style="opacity:0.5;">tracking active</span>';
+            }
+        });
+    }
+
+    function renderPosts() {
+        const tbody = document.getElementById('postsTableBody');
+        tbody.innerHTML = '';
+        posts.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="font-medium">${p.title}</div>
+                    <div class="font-jetbrains text-xs text-on-surface-variant mt-1" style="letter-spacing:0.05em;">${p.tags.map(t=>'#'+t).join(' ')}</div>
+                </td>
+                <td><span class="status-badge ${p.status==='published'?'status-published':'status-draft'}">
+                    <span style="width:6px;height:6px;display:inline-block;background:currentColor;"></span>
+                    ${p.status}
+                </span></td>
+                <td class="font-jetbrains text-xs text-on-surface-variant">${p.date}</td>
+                <td class="font-jetbrains text-xs">${p.views > 0 ? p.views.toLocaleString() : '—'}</td>
+                <td style="text-align:right;">
+                    <button class="action-btn" onclick="editPost(${p.id})" title="Edit">
+                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                    </button>
+                    <button class="action-btn" onclick="togglePublish(${p.id})" title="${p.status==='published'?'Unpublish':'Publish'}">
+                        <span class="material-symbols-outlined" style="font-size:18px;">${p.status==='published'?'visibility_off':'publish'}</span>
+                    </button>
+                    <button class="action-btn delete" onclick="deletePost(${p.id})" title="Delete">
+                        <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        updateStats();
+    }
+
+    function updateStats() {
+        const drafts = posts.filter(p => p.status === 'draft');
+
+        document.getElementById('statTotalPosts').textContent = posts.length;
+        document.getElementById('statDrafts').textContent = drafts.length;
+        document.getElementById('statMedia').textContent = mediaFiles.length;
+
+        // Posts published this month
+        const now = new Date();
+        const thisMonth = posts.filter(p => {
+            const d = new Date(p.date);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        });
+        const postsDelta = document.getElementById('statPostsDelta');
+        if (postsDelta && thisMonth.length > 0) {
+            postsDelta.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">trending_up</span> +' + thisMonth.length + ' this month';
+        } else if (postsDelta) {
+            postsDelta.textContent = '';
+        }
+    }
+
+    function editPost(id) {
+        const post = posts.find(p=>p.id===id);
+        if (!post) return;
+        editingPostId = id;
+        document.getElementById('editorTitle').value = post.title;
+        document.getElementById('editorContent').value = post.content || '';
+        renderEditorTags(post.tags);
+        switchTab('editor');
+        showToast('Editing: ' + post.title, 'info');
+    }
+
+    function togglePublish(id) {
+        const post = posts.find(p=>p.id===id);
+        if (!post) return;
+        post.status = post.status === 'published' ? 'draft' : 'published';
+        post.date = new Date().toISOString().split('T')[0];
+        renderPosts();
+        showToast(post.status === 'published' ? 'Post published' : 'Post unpublished', 'success');
+    }
+
+    function deletePost(id) {
+        if (!confirm('Delete this post permanently?')) return;
+        posts = posts.filter(p=>p.id!==id);
+        renderPosts();
+        showToast('Post deleted', 'error');
+    }
+
+    /* ═══════════════════════════════════════════
+       EDITOR
+    ═══════════════════════════════════════════ */
+    let editorTags = [];
+
+    function renderEditorTags(tags) {
+        editorTags = tags || [];
+        const container = document.getElementById('editorTags');
+        container.innerHTML = '';
+        editorTags.forEach((tag, i) => {
+            const el = document.createElement('span');
+            el.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(156,255,147,0.08);border:1px solid rgba(156,255,147,0.2);color:var(--primary);font-family:"JetBrains Mono",monospace;font-size:0.65rem;letter-spacing:0.05em;text-transform:uppercase;';
+            el.innerHTML = tag + '<button onclick="removeTag('+i+')" style="background:none;border:none;color:var(--error);cursor:pointer;font-size:14px;padding:0 0 0 4px;line-height:1;">&times;</button>';
+            container.appendChild(el);
+        });
+    }
+
+    function removeTag(i) {
+        editorTags.splice(i, 1);
+        renderEditorTags(editorTags);
+    }
+
+    document.getElementById('editorTagInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            e.preventDefault();
+            editorTags.push(this.value.trim());
+            this.value = '';
+            renderEditorTags(editorTags);
+        }
+    });
+
+    function insertMd(before, after) {
+        const ta = document.getElementById('editorContent');
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const selected = ta.value.substring(start, end) || 'text';
+        ta.value = ta.value.substring(0, start) + before + selected + after + ta.value.substring(end);
+        ta.focus();
+        ta.selectionStart = start + before.length;
+        ta.selectionEnd = start + before.length + selected.length;
+    }
+
+    function savePost(status) {
+        const title = document.getElementById('editorTitle').value.trim();
+        const content = document.getElementById('editorContent').value.trim();
+        if (!title) { showToast('Title is required', 'error'); return; }
+
+        if (editingPostId) {
+            const post = posts.find(p=>p.id===editingPostId);
+            if (post) {
+                post.title = title;
+                post.content = content;
+                post.tags = [...editorTags];
+                post.status = status;
+                post.date = new Date().toISOString().split('T')[0];
+            }
+            editingPostId = null;
+        } else {
+            posts.unshift({
+                id: Date.now(),
+                title,
+                content,
+                status,
+                date: new Date().toISOString().split('T')[0],
+                views: 0,
+                tags: [...editorTags],
+            });
+        }
+
+        clearEditor();
+        renderPosts();
+        switchTab('posts');
+        showToast(status === 'published' ? 'Post published successfully' : 'Draft saved', 'success');
+    }
+
+    function clearEditor() {
+        document.getElementById('editorTitle').value = '';
+        document.getElementById('editorContent').value = '';
+        editorTags = [];
+        renderEditorTags([]);
+        editingPostId = null;
+        removeFeaturedImage();
+    }
+
+    /* ═══════════════════════════════════════════
+       FEATURED IMAGE
+    ═══════════════════════════════════════════ */
+    document.getElementById('featuredImageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('featuredImageThumb').src = ev.target.result;
+            document.getElementById('featuredImagePreview').style.display = 'flex';
+            document.getElementById('featuredImageZone').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function removeFeaturedImage() {
+        document.getElementById('featuredImagePreview').style.display = 'none';
+        document.getElementById('featuredImageZone').style.display = 'block';
+        document.getElementById('featuredImageInput').value = '';
+    }
+
+    /* ═══════════════════════════════════════════
+       MEDIA UPLOAD
+    ═══════════════════════════════════════════ */
+    function setupDragDrop(zone, input) {
+        ['dragenter','dragover'].forEach(ev => {
+            zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('dragover'); });
+        });
+        ['dragleave','drop'].forEach(ev => {
+            zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('dragover'); });
+        });
+        zone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            handleMediaFiles(files);
+        });
+        input.addEventListener('change', e => handleMediaFiles(e.target.files));
+    }
+
+    function handleMediaFiles(files) {
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                mediaFiles.push({
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: (file.size / 1024).toFixed(1) + ' KB',
+                    src: ev.target.result,
+                    date: new Date().toISOString().split('T')[0],
+                });
+                renderMedia();
+                showToast('Uploaded: ' + file.name, 'success');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderMedia() {
+        const grid = document.getElementById('mediaGrid');
+        const empty = document.getElementById('mediaEmpty');
+        grid.innerHTML = '';
+        if (mediaFiles.length === 0) {
+            empty.style.display = 'block';
+        } else {
+            empty.style.display = 'none';
+            mediaFiles.forEach((m, i) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'position:relative;background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);overflow:hidden;';
+                div.innerHTML = `
+                    <img src="${m.src}" style="width:100%;height:120px;object-fit:cover;display:block;" alt="${m.name}">
+                    <div style="padding:8px;">
+                        <div class="font-jetbrains" style="font-size:0.55rem;color:var(--on-surface-variant);letter-spacing:0.05em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.name}</div>
+                        <div class="font-jetbrains" style="font-size:0.5rem;color:var(--outline);margin-top:2px;">${m.size}</div>
+                    </div>
+                    <button onclick="deleteMedia(${i})" style="position:absolute;top:4px;right:4px;background:rgba(14,14,15,0.8);border:none;color:var(--error);cursor:pointer;padding:4px;line-height:1;">
+                        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+                    </button>
+                `;
+                grid.appendChild(div);
+            });
+        }
+        updateStats();
+    }
+
+    function deleteMedia(i) {
+        mediaFiles.splice(i, 1);
+        renderMedia();
+        showToast('Media file removed', 'error');
+    }
+
+    /* ═══════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════ */
+    renderPosts();
+    renderEditorTags([]);
+    renderMedia();
+
+    // Setup drag & drop zones
+    const mZone = document.getElementById('mediaUploadZone');
+    const mInput = document.getElementById('mediaInput');
+    if (mZone && mInput) setupDragDrop(mZone, mInput);
+
+    const fZone = document.getElementById('featuredImageZone');
+    const fInput = document.getElementById('featuredImageInput');
+    if (fZone && fInput) {
+        ['dragenter','dragover'].forEach(ev => {
+            fZone.addEventListener(ev, e => { e.preventDefault(); fZone.classList.add('dragover'); });
+        });
+        ['dragleave','drop'].forEach(ev => {
+            fZone.addEventListener(ev, e => { e.preventDefault(); fZone.classList.remove('dragover'); });
+        });
+        fZone.addEventListener('drop', e => {
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('featuredImageThumb').src = ev.target.result;
+                    document.getElementById('featuredImagePreview').style.display = 'flex';
+                    fZone.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    </script>
+    <script src="morph-scroll.js"></script>
+    <script data-goatcounter="https://madhavasai.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
