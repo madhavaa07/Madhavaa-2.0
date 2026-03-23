@@ -222,6 +222,73 @@
             background: rgba(138,242,255,0.1);
             border: 1px solid rgba(138,242,255,0.2);
         }
+        .status-scheduled {
+            color: #ffb74d;
+            background: rgba(255,183,77,0.1);
+            border: 1px solid rgba(255,183,77,0.2);
+        }
+
+        /* Schedule Modal */
+        .schedule-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .schedule-modal-overlay.active { display: flex; }
+        .schedule-modal {
+            background: var(--surface-container-low);
+            border: 1px solid rgba(72,72,73,0.3);
+            width: 420px;
+            max-width: 90vw;
+            padding: 0;
+            position: relative;
+        }
+        .schedule-modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(72,72,73,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .schedule-modal-body { padding: 24px; }
+        .schedule-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(72,72,73,0.2);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .schedule-input {
+            width: 100%;
+            background: var(--surface-container-highest);
+            border: 1px solid rgba(72,72,73,0.3);
+            color: var(--on-surface);
+            padding: 12px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .schedule-input:focus { border-color: rgba(255,183,77,0.6); }
+        .schedule-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .scheduled-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255,183,77,0.06);
+            border: 1px solid rgba(255,183,77,0.2);
+            color: #ffb74d;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            margin-top: 12px;
+        }
 
         .action-btn {
             padding: 6px;
@@ -535,6 +602,38 @@
         <p style="color:#767576;font-size:11px;margin-top:8px;letter-spacing:1px;">REDIRECTING TO AUTH PORTAL...</p>
     </div>
 
+    <!-- Schedule Modal -->
+    <div class="schedule-modal-overlay" id="scheduleModal">
+        <div class="schedule-modal">
+            <div class="schedule-modal-header">
+                <div>
+                    <div class="font-jetbrains text-xs" style="color:#ffb74d;letter-spacing:0.1em;text-transform:uppercase;">// SCHEDULE POST</div>
+                    <div class="font-space-grotesk text-lg text-on-surface mt-1">Set Publish Date</div>
+                </div>
+                <button onclick="closeScheduleModal()" style="background:none;border:none;color:var(--on-surface-variant);cursor:pointer;">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="schedule-modal-body">
+                <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:8px;">DATE</label>
+                <input type="date" class="schedule-input" id="scheduleDate">
+                <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.1em;text-transform:uppercase;display:block;margin-top:16px;margin-bottom:8px;">TIME</label>
+                <input type="time" class="schedule-input" id="scheduleTime">
+                <div id="schedulePreview" class="scheduled-info-bar" style="display:none;">
+                    <span class="material-symbols-outlined" style="font-size:16px;">schedule</span>
+                    <span id="schedulePreviewText"></span>
+                </div>
+            </div>
+            <div class="schedule-modal-footer">
+                <button class="btn-secondary" onclick="closeScheduleModal()">CANCEL</button>
+                <button class="btn-primary" onclick="confirmSchedule()" style="background:linear-gradient(135deg,#ffb74d 0%,#ff9800 100%);color:#1a1a1a;">
+                    <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">schedule_send</span>
+                    SCHEDULE
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="dash-toast" id="dashToast"></div>
 
@@ -654,6 +753,10 @@
                             <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">edit</span>
                             Editor
                         </button>
+                        <button class="dash-tab" data-tab="scheduled" onclick="switchTab('scheduled')">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">schedule_send</span>
+                            Scheduled <span id="scheduledCount" class="font-jetbrains" style="font-size:0.6rem;color:#ffb74d;margin-left:4px;"></span>
+                        </button>
                         <button class="dash-tab" data-tab="media" onclick="switchTab('media')">
                             <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">photo_library</span>
                             Media
@@ -725,11 +828,22 @@
                         <!-- Content Area -->
                         <textarea class="editor-area" id="editorContent" placeholder="Write your post content in Markdown..."></textarea>
 
+                        <!-- Schedule Info (shown when a post is scheduled) -->
+                        <div id="editorScheduleInfo" class="scheduled-info-bar" style="display:none;margin-top:16px;">
+                            <span class="material-symbols-outlined" style="font-size:16px;">schedule</span>
+                            <span id="editorScheduleText"></span>
+                            <button onclick="removeSchedule()" style="background:none;border:none;color:var(--error);cursor:pointer;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.05em;text-transform:uppercase;">REMOVE</button>
+                        </div>
+
                         <!-- Actions -->
                         <div class="flex gap-4 mt-6 flex-wrap">
                             <button class="btn-primary" onclick="savePost('published')">
                                 <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">publish</span>
                                 PUBLISH
+                            </button>
+                            <button class="btn-primary" onclick="openScheduleModal()" style="background:linear-gradient(135deg,#ffb74d 0%,#ff9800 100%);color:#1a1a1a;">
+                                <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">schedule_send</span>
+                                SCHEDULE
                             </button>
                             <button class="btn-secondary" onclick="savePost('draft')">
                                 <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px;">save</span>
@@ -737,6 +851,34 @@
                             </button>
                             <button class="btn-secondary" onclick="clearEditor()">CLEAR</button>
                         </div>
+                    </div>
+                </section>
+
+                <!-- ============ TAB: SCHEDULED ============ -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8" id="tab-scheduled" style="display:none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <div class="font-jetbrains text-xs" style="color:#ffb74d;letter-spacing:0.1em;text-transform:uppercase;">// SCHEDULED_QUEUE</div>
+                            <p class="text-on-surface-variant text-sm mt-1">Posts queued for automatic publication.</p>
+                        </div>
+                    </div>
+                    <div id="scheduledEmpty" class="text-center py-16">
+                        <span class="material-symbols-outlined" style="font-size:48px;color:var(--outline-variant);">schedule</span>
+                        <p class="font-jetbrains text-xs text-on-surface-variant mt-4" style="letter-spacing:0.08em;">NO POSTS SCHEDULED</p>
+                        <p class="text-xs text-outline mt-2">Write a post and click Schedule to queue it for future publication.</p>
+                    </div>
+                    <div class="overflow-x-auto" id="scheduledTableWrap" style="display:none;background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);">
+                        <table class="post-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Scheduled For</th>
+                                    <th>Time Remaining</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduledTableBody"></tbody>
+                        </table>
                     </div>
                 </section>
 
@@ -926,9 +1068,9 @@
                     <div class="font-medium">${p.title}</div>
                     <div class="font-jetbrains text-xs text-on-surface-variant mt-1" style="letter-spacing:0.05em;">${p.tags.map(t=>'#'+t).join(' ')}</div>
                 </td>
-                <td><span class="status-badge ${p.status==='published'?'status-published':'status-draft'}">
+                <td><span class="status-badge ${p.status==='published'?'status-published':p.status==='scheduled'?'status-scheduled':'status-draft'}">
                     <span style="width:6px;height:6px;display:inline-block;background:currentColor;"></span>
-                    ${p.status}
+                    ${p.status}${p.scheduledAt ? ' — ' + new Date(p.scheduledAt).toLocaleDateString() : ''}
                 </span></td>
                 <td class="font-jetbrains text-xs text-on-surface-variant">${p.date}</td>
                 <td class="font-jetbrains text-xs">${p.views > 0 ? p.views.toLocaleString() : '—'}</td>
@@ -951,9 +1093,10 @@
 
     function updateStats() {
         const drafts = posts.filter(p => p.status === 'draft');
+        const scheduled = posts.filter(p => p.status === 'scheduled');
 
         document.getElementById('statTotalPosts').textContent = posts.length;
-        document.getElementById('statDrafts').textContent = drafts.length;
+        document.getElementById('statDrafts').textContent = drafts.length + (scheduled.length > 0 ? ' + ' + scheduled.length + ' queued' : '');
         document.getElementById('statMedia').textContent = mediaFiles.length;
 
         // Posts published this month
@@ -1039,38 +1182,7 @@
         ta.selectionEnd = start + before.length + selected.length;
     }
 
-    function savePost(status) {
-        const title = document.getElementById('editorTitle').value.trim();
-        const content = document.getElementById('editorContent').value.trim();
-        if (!title) { showToast('Title is required', 'error'); return; }
-
-        if (editingPostId) {
-            const post = posts.find(p=>p.id===editingPostId);
-            if (post) {
-                post.title = title;
-                post.content = content;
-                post.tags = [...editorTags];
-                post.status = status;
-                post.date = new Date().toISOString().split('T')[0];
-            }
-            editingPostId = null;
-        } else {
-            posts.unshift({
-                id: Date.now(),
-                title,
-                content,
-                status,
-                date: new Date().toISOString().split('T')[0],
-                views: 0,
-                tags: [...editorTags],
-            });
-        }
-
-        clearEditor();
-        renderPosts();
-        switchTab('posts');
-        showToast(status === 'published' ? 'Post published successfully' : 'Draft saved', 'success');
-    }
+    // savePost is defined in the BLOG SCHEDULING section below
 
     function clearEditor() {
         document.getElementById('editorTitle').value = '';
@@ -1078,6 +1190,8 @@
         editorTags = [];
         renderEditorTags([]);
         editingPostId = null;
+        pendingScheduleDate = null;
+        document.getElementById('editorScheduleInfo').style.display = 'none';
         removeFeaturedImage();
     }
 
@@ -1172,11 +1286,286 @@
     }
 
     /* ═══════════════════════════════════════════
+       BLOG SCHEDULING
+    ═══════════════════════════════════════════ */
+    let pendingScheduleDate = null;
+
+    function openScheduleModal() {
+        const title = document.getElementById('editorTitle').value.trim();
+        if (!title) { showToast('Title is required before scheduling', 'error'); return; }
+
+        // Default to tomorrow at 9:00 AM
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0);
+
+        const dateInput = document.getElementById('scheduleDate');
+        const timeInput = document.getElementById('scheduleTime');
+        dateInput.value = tomorrow.toISOString().split('T')[0];
+        dateInput.min = new Date().toISOString().split('T')[0];
+        timeInput.value = '09:00';
+
+        updateSchedulePreview();
+        document.getElementById('scheduleModal').classList.add('active');
+    }
+
+    function closeScheduleModal() {
+        document.getElementById('scheduleModal').classList.remove('active');
+    }
+
+    function updateSchedulePreview() {
+        const dateVal = document.getElementById('scheduleDate').value;
+        const timeVal = document.getElementById('scheduleTime').value;
+        const preview = document.getElementById('schedulePreview');
+        const previewText = document.getElementById('schedulePreviewText');
+
+        if (dateVal && timeVal) {
+            const scheduled = new Date(dateVal + 'T' + timeVal);
+            const now = new Date();
+            const diff = scheduled - now;
+
+            if (diff <= 0) {
+                previewText.textContent = 'TIME IS IN THE PAST — WILL PUBLISH IMMEDIATELY';
+            } else {
+                const days = Math.floor(diff / (1000*60*60*24));
+                const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+                let timeStr = '';
+                if (days > 0) timeStr += days + 'd ';
+                if (hours > 0) timeStr += hours + 'h ';
+                timeStr += mins + 'm from now';
+                previewText.textContent = 'PUBLISHES IN ' + timeStr + ' — ' + scheduled.toLocaleString();
+            }
+            preview.style.display = 'flex';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    document.getElementById('scheduleDate').addEventListener('change', updateSchedulePreview);
+    document.getElementById('scheduleTime').addEventListener('change', updateSchedulePreview);
+
+    function confirmSchedule() {
+        const dateVal = document.getElementById('scheduleDate').value;
+        const timeVal = document.getElementById('scheduleTime').value;
+
+        if (!dateVal || !timeVal) {
+            showToast('Please set both date and time', 'error');
+            return;
+        }
+
+        const scheduledAt = new Date(dateVal + 'T' + timeVal).toISOString();
+        pendingScheduleDate = scheduledAt;
+
+        // Show schedule info in editor
+        const infoBar = document.getElementById('editorScheduleInfo');
+        const infoText = document.getElementById('editorScheduleText');
+        infoText.textContent = 'SCHEDULED: ' + new Date(scheduledAt).toLocaleString();
+        infoBar.style.display = 'flex';
+
+        closeScheduleModal();
+
+        // Now save the post as scheduled
+        savePost('scheduled', scheduledAt);
+    }
+
+    function removeSchedule() {
+        pendingScheduleDate = null;
+        document.getElementById('editorScheduleInfo').style.display = 'none';
+    }
+
+    function savePost(status, scheduledAt) {
+        const title = document.getElementById('editorTitle').value.trim();
+        const content = document.getElementById('editorContent').value.trim();
+        if (!title) { showToast('Title is required', 'error'); return; }
+
+        const postData = {
+            title,
+            content,
+            tags: [...editorTags],
+            status,
+            date: new Date().toISOString().split('T')[0],
+            views: 0,
+        };
+
+        if (status === 'scheduled' && scheduledAt) {
+            postData.scheduledAt = scheduledAt;
+        }
+
+        if (editingPostId) {
+            const post = posts.find(p=>p.id===editingPostId);
+            if (post) {
+                Object.assign(post, postData);
+            }
+            editingPostId = null;
+        } else {
+            postData.id = Date.now();
+            posts.unshift(postData);
+        }
+
+        // Persist scheduled posts to localStorage
+        saveScheduledPosts();
+
+        clearEditor();
+        renderPosts();
+        renderScheduledQueue();
+        if (status === 'scheduled') {
+            switchTab('scheduled');
+            showToast('Post scheduled for ' + new Date(scheduledAt).toLocaleString(), 'success');
+        } else {
+            switchTab('posts');
+            showToast(status === 'published' ? 'Post published successfully' : 'Draft saved', 'success');
+        }
+    }
+
+    // Persist scheduled posts in localStorage so they survive page reload
+    function saveScheduledPosts() {
+        const scheduled = posts.filter(p => p.status === 'scheduled' && p.scheduledAt);
+        try {
+            localStorage.setItem('msk_scheduled_posts', JSON.stringify(scheduled));
+        } catch(e) {}
+    }
+
+    function loadScheduledPosts() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('msk_scheduled_posts'));
+            if (saved && Array.isArray(saved)) {
+                saved.forEach(sp => {
+                    // Don't duplicate if already loaded from CMS
+                    if (!posts.find(p => p.id === sp.id)) {
+                        posts.push(sp);
+                    }
+                });
+            }
+        } catch(e) {}
+    }
+
+    function renderScheduledQueue() {
+        const scheduled = posts.filter(p => p.status === 'scheduled' && p.scheduledAt);
+        const emptyEl = document.getElementById('scheduledEmpty');
+        const tableWrap = document.getElementById('scheduledTableWrap');
+        const tbody = document.getElementById('scheduledTableBody');
+        const countEl = document.getElementById('scheduledCount');
+
+        if (scheduled.length === 0) {
+            emptyEl.style.display = 'block';
+            tableWrap.style.display = 'none';
+            countEl.textContent = '';
+        } else {
+            emptyEl.style.display = 'none';
+            tableWrap.style.display = 'block';
+            countEl.textContent = '(' + scheduled.length + ')';
+            tbody.innerHTML = '';
+
+            scheduled.sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+
+            scheduled.forEach(p => {
+                const schedDate = new Date(p.scheduledAt);
+                const now = new Date();
+                const diff = schedDate - now;
+
+                let remaining = '';
+                if (diff <= 0) {
+                    remaining = '<span style="color:var(--primary);">PUBLISHING NOW...</span>';
+                } else {
+                    const days = Math.floor(diff / (1000*60*60*24));
+                    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                    const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+                    if (days > 0) remaining += days + 'd ';
+                    if (hours > 0) remaining += hours + 'h ';
+                    remaining += mins + 'm';
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="font-medium">${p.title}</div>
+                        <div class="font-jetbrains text-xs text-on-surface-variant mt-1" style="letter-spacing:0.05em;">${(p.tags||[]).map(t=>'#'+t).join(' ')}</div>
+                    </td>
+                    <td>
+                        <div class="font-jetbrains text-xs" style="color:#ffb74d;">${schedDate.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'})}</div>
+                        <div class="font-jetbrains text-xs text-on-surface-variant mt-1">${schedDate.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}</div>
+                    </td>
+                    <td class="font-jetbrains text-xs">${remaining}</td>
+                    <td style="text-align:right;">
+                        <button class="action-btn" onclick="publishNow(${p.id})" title="Publish now">
+                            <span class="material-symbols-outlined" style="font-size:18px;">publish</span>
+                        </button>
+                        <button class="action-btn" onclick="editPost(${p.id})" title="Edit">
+                            <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                        </button>
+                        <button class="action-btn delete" onclick="cancelSchedule(${p.id})" title="Cancel schedule">
+                            <span class="material-symbols-outlined" style="font-size:18px;">event_busy</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    function publishNow(id) {
+        const post = posts.find(p => p.id === id);
+        if (!post) return;
+        post.status = 'published';
+        post.date = new Date().toISOString().split('T')[0];
+        delete post.scheduledAt;
+        saveScheduledPosts();
+        renderPosts();
+        renderScheduledQueue();
+        showToast('Post published: ' + post.title, 'success');
+    }
+
+    function cancelSchedule(id) {
+        const post = posts.find(p => p.id === id);
+        if (!post) return;
+        post.status = 'draft';
+        delete post.scheduledAt;
+        saveScheduledPosts();
+        renderPosts();
+        renderScheduledQueue();
+        showToast('Schedule cancelled — saved as draft', 'info');
+    }
+
+    // Auto-publish checker — runs every 30 seconds
+    function checkScheduledPosts() {
+        const now = new Date();
+        let published = false;
+        posts.forEach(p => {
+            if (p.status === 'scheduled' && p.scheduledAt) {
+                const schedDate = new Date(p.scheduledAt);
+                if (now >= schedDate) {
+                    p.status = 'published';
+                    p.date = now.toISOString().split('T')[0];
+                    delete p.scheduledAt;
+                    published = true;
+                    showToast('Auto-published: ' + p.title, 'success');
+                }
+            }
+        });
+        if (published) {
+            saveScheduledPosts();
+            renderPosts();
+            renderScheduledQueue();
+        }
+    }
+
+    // Run scheduler check every 30 seconds
+    setInterval(checkScheduledPosts, 30000);
+    // Also check immediately on load
+    setTimeout(checkScheduledPosts, 2000);
+
+    // Refresh the "time remaining" column every minute
+    setInterval(renderScheduledQueue, 60000);
+
+    /* ═══════════════════════════════════════════
        INIT
     ═══════════════════════════════════════════ */
+    loadScheduledPosts();
     renderPosts();
     renderEditorTags([]);
     renderMedia();
+    renderScheduledQueue();
 
     // Setup drag & drop zones
     const mZone = document.getElementById('mediaUploadZone');
