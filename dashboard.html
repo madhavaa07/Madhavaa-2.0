@@ -1148,7 +1148,7 @@
                         </div>
                         <div class="font-jetbrains text-on-surface-variant text-xs">© 2024 MSK. All signal patterns intercepted.</div>
                         <div class="flex flex-wrap gap-4 sm:gap-8">
-                            <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-tertiary border border-outline-variant/20">TZ: UTC-8</div>
+                            <div id="footerTZ" class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-tertiary border border-outline-variant/20">TZ: —</div>
                             <div class="bg-surface-container-low px-3 py-2 font-jetbrains text-xs text-primary border border-outline-variant/20 flex items-center gap-2">
                                 <span class="inline-block w-2 h-2 bg-primary animate-pulse"></span>
                                 ONLINE
@@ -2123,6 +2123,21 @@
     }
     </script>
     <script src="morph-scroll.js"></script>
+    <script>
+    // Dynamic Timezone Display (DST-aware)
+    (function updateFooterTZ() {
+        const el = document.getElementById('footerTZ');
+        if (!el) return;
+        const now = new Date();
+        const offsetMin = now.getTimezoneOffset();
+        const sign = offsetMin <= 0 ? '+' : '-';
+        const absH = Math.floor(Math.abs(offsetMin) / 60);
+        const absM = Math.abs(offsetMin) % 60;
+        const utcLabel = 'UTC' + sign + absH + (absM ? ':' + String(absM).padStart(2, '0') : '');
+        const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        el.textContent = 'TZ: ' + utcLabel + (tzName ? ' (' + tzName.split('/').pop().replace(/_/g, ' ') + ')' : '');
+    })();
+    </script>
     <script>
     // Register PWA Service Worker
     if ('serviceWorker' in navigator) {
