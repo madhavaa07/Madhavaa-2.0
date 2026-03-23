@@ -1755,16 +1755,30 @@
         ghSyncStatus('Pulling from GitHub...', 'info');
 
         try {
-            // Use raw URL for the actual content (no token needed for public repos)
             const owner = config.owner || 'madhavaa07';
             const repo = config.repo || 'msk-blog-data';
             const filePath = config.filePath || 'posts.json';
-            const rawUrl = 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/main/' + filePath + '?t=' + Date.now();
+            let data;
 
-            const resp = await fetch(rawUrl);
-            if (!resp.ok) throw new Error('Failed to fetch: ' + resp.status + ' ' + resp.statusText);
-
-            const data = await resp.json();
+            // Use GitHub API (no CDN cache) when token is available, else fall back to raw URL
+            if (config.token) {
+                ghLog('Using GitHub API (uncached) with token...');
+                const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filePath;
+                const resp = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': 'Bearer ' + config.token,
+                        'Accept': 'application/vnd.github.v3.raw+json'
+                    }
+                });
+                if (!resp.ok) throw new Error('API fetch failed: ' + resp.status + ' ' + resp.statusText);
+                data = await resp.json();
+            } else {
+                ghLog('No token — using raw URL (may be CDN-cached)...');
+                const rawUrl = 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/main/' + filePath + '?t=' + Date.now();
+                const resp = await fetch(rawUrl);
+                if (!resp.ok) throw new Error('Failed to fetch: ' + resp.status + ' ' + resp.statusText);
+                data = await resp.json();
+            }
             if (!Array.isArray(data)) throw new Error('Invalid posts.json format — expected array');
 
             // Store the full raw CMS data
