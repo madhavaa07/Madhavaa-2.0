@@ -2072,13 +2072,7 @@
             }, 3000);
         });
 
-        // Resume Button Handler
-        document.querySelector('.btn-primary').addEventListener('click', function(e) {
-            if (this.textContent.includes('Resume')) {
-                // In a real scenario, this would download the resume
-                alert('Resume download initiated. In production, this would download a PDF file.');
-            }
-        });
+        // CV download is handled by the cvModal and triggerDownload function
 
         // Sidebar scroll-spy: highlight active section on scroll
         (function() {
@@ -2293,14 +2287,13 @@
     <script>
     function triggerDownload(filename) {
         document.getElementById('cvModal').classList.remove('active');
-        var iframe = document.getElementById('dlFrame');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'dlFrame';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-        }
-        iframe.src = filename;
+        var a = document.createElement('a');
+        a.href = filename;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
     </script>
 </body>
