@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - MSK</title>
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#9cff93">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MSK Dashboard">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -496,6 +503,125 @@
         .preloader-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #9cff93, #00fc40); transition: width 0.3s ease; }
         @keyframes cursor-blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
         .preloader-cursor { display: inline-block; width: 7px; height: 14px; background: #9cff93; margin-left: 2px; vertical-align: middle; animation: cursor-blink 0.8s step-end infinite; }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE — MOBILE FIRST
+        ═══════════════════════════════════════════ */
+
+        /* Mobile: 0–639px */
+        @media (max-width: 639px) {
+            /* Hide sidebar on mobile */
+            aside.hidden.lg\\:flex, aside { display: none !important; }
+            .flex-1.lg\\:ml-20, .flex-1 { margin-left: 0 !important; }
+
+            /* Header: stack vertically */
+            header .flex.items-center.justify-between { flex-direction: column; align-items: flex-start; gap: 16px; }
+            header h1 { font-size: 1.75rem; }
+            header .flex.gap-3 { width: 100%; justify-content: stretch; }
+            header .flex.gap-3 > * { flex: 1; text-align: center; padding: 10px 8px !important; font-size: 0.65rem; }
+
+            /* Stats grid: 2 columns */
+            .grid.grid-cols-2.sm\\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .stat-card { padding: 16px; }
+            .stat-value { font-size: 1.75rem; }
+            .stat-label { font-size: 0.55rem; }
+
+            /* Tab navigation: horizontal scroll */
+            .flex.gap-1.overflow-x-auto { gap: 0; }
+            .dash-tab { padding: 10px 12px; font-size: 0.6rem; white-space: nowrap; }
+            .dash-tab .material-symbols-outlined { display: none; }
+
+            /* Posts table: card layout */
+            .post-table thead { display: none; }
+            .post-table tbody tr {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 16px;
+                border-bottom: 1px solid rgba(72,72,73,0.15);
+                gap: 8px;
+                align-items: center;
+            }
+            .post-table td { padding: 0; border: none; font-size: 0.8rem; }
+            .post-table td:first-child { width: 100%; }
+            .post-table td:first-child .font-medium { font-size: 0.85rem; }
+            .post-table td:last-child { margin-left: auto; }
+
+            /* Editor */
+            .editor-input.title-input { font-size: 1.25rem; }
+            .editor-area { min-height: 200px; padding: 14px; font-size: 0.85rem; }
+            .flex.gap-4.mt-6.flex-wrap { gap: 8px; }
+            .flex.gap-4.mt-6.flex-wrap .btn-primary,
+            .flex.gap-4.mt-6.flex-wrap .btn-secondary { flex: 1; min-width: 0; padding: 12px 12px; font-size: 0.65rem; text-align: center; }
+
+            /* GitHub Sync */
+            #tab-github .flex.gap-4.flex-wrap { flex-direction: column; }
+            #tab-github input[style*="width:200px"] { width: 100% !important; }
+
+            /* Toast */
+            .dash-toast { top: auto; bottom: 16px; right: 8px; left: 8px; text-align: center; font-size: 0.6rem; padding: 12px 16px; }
+
+            /* Section padding */
+            .px-6.sm\\:px-8.lg\\:px-12 { padding-left: 16px; padding-right: 16px; }
+
+            /* Upload zone */
+            .upload-zone { padding: 24px 16px; }
+
+            /* Nav bar */
+            nav .flex.items-center.gap-8 { gap: 12px; }
+            .msk-nav-link { font-size: 0.6rem; }
+            nav .font-space-grotesk.text-xl { font-size: 1rem; }
+
+            /* Media grid */
+            .grid-cols-2.sm\\:grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Tablet: 640px–1023px */
+        @media (min-width: 640px) and (max-width: 1023px) {
+            aside { display: none !important; }
+            .flex-1.lg\\:ml-20, .flex-1 { margin-left: 0 !important; }
+
+            .stat-value { font-size: 2rem; }
+
+            .dash-tab { padding: 10px 16px; font-size: 0.65rem; }
+
+            #tab-github .flex.gap-4.flex-wrap input[style*="width:200px"] { width: 160px !important; }
+        }
+
+        /* Large screens: 1440px+ */
+        @media (min-width: 1440px) {
+            .max-w-4xl { max-width: 64rem; }
+            .stat-value { font-size: 3rem; }
+            .stat-card { padding: 32px; }
+            .editor-area { min-height: 450px; }
+            header h1 { font-size: 2.75rem; }
+        }
+
+        /* TV/Ultra-wide: 1920px+ */
+        @media (min-width: 1920px) {
+            .max-w-4xl { max-width: 80rem; }
+            .stat-value { font-size: 3.5rem; }
+            .stat-card { padding: 40px; }
+            header h1 { font-size: 3rem; }
+            .editor-area { min-height: 600px; font-size: 1.1rem; }
+            .post-table td { font-size: 1rem; padding: 20px; }
+            .post-table th { font-size: 0.7rem; padding: 16px 20px; }
+            .dash-tab { font-size: 0.8rem; padding: 14px 28px; }
+            .btn-primary, .btn-secondary { padding: 16px 36px; font-size: 0.85rem; }
+        }
+
+        /* Touch-friendly: ensure minimum tap targets */
+        @media (pointer: coarse) {
+            .action-btn { padding: 10px; min-width: 44px; min-height: 44px; }
+            .toolbar-btn { padding: 12px 14px; min-width: 44px; min-height: 44px; }
+            .dash-tab { min-height: 44px; }
+            select, input[type="text"], input[type="password"] { min-height: 44px; }
+        }
+
+        /* PWA standalone mode */
+        @media (display-mode: standalone) {
+            nav { padding-top: env(safe-area-inset-top, 0); }
+            body { padding-bottom: env(safe-area-inset-bottom, 0); }
+        }
     </style>
 
     <script>
@@ -654,6 +780,18 @@
                 <button onclick="logout()" class="p-2 hover:text-error transition-colors" title="Logout">
                     <span class="material-symbols-outlined text-xl" style="color:#adaaab;">logout</span>
                 </button>
+                <button onclick="document.getElementById('mobileNav').classList.toggle('hidden')" class="md:hidden p-2">
+                    <span class="material-symbols-outlined text-xl" style="color:#adaaab;">menu</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Nav Dropdown -->
+        <div id="mobileNav" class="hidden md:hidden px-6 pb-4" style="background:rgba(14,14,15,0.95);border-top:1px solid rgba(72,72,73,0.15);">
+            <div class="flex flex-col gap-3 py-2">
+                <a href="blog.html" class="msk-nav-link py-2">Blog</a>
+                <a href="us-job-market.html" class="msk-nav-link py-2">Jobs Intel</a>
+                <a href="index.html" class="msk-nav-link py-2">Portfolio</a>
+                <a href="index.html#contact" class="msk-nav-link py-2">Contact</a>
             </div>
         </div>
     </nav>
@@ -1985,6 +2123,12 @@
     }
     </script>
     <script src="morph-scroll.js"></script>
+    <script>
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw-dashboard.js').catch(() => {});
+    }
+    </script>
     <script data-goatcounter="https://madhavasai.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
