@@ -699,10 +699,20 @@
                             <h1 class="font-space-grotesk text-3xl sm:text-4xl">BLOG DASHBOARD</h1>
                             <p class="text-on-surface-variant text-sm mt-2">Manage posts, media, and analytics from one terminal.</p>
                         </div>
-                        <button class="btn-primary flex items-center gap-2" onclick="switchTab('editor')">
-                            <span class="material-symbols-outlined" style="font-size:18px;">add</span>
-                            NEW POST
-                        </button>
+                        <div class="flex gap-3 flex-wrap">
+                            <button class="btn-secondary flex items-center gap-2" onclick="pullFromGitHub()" title="Pull latest from GitHub" style="padding:8px 14px;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">cloud_download</span>
+                                PULL
+                            </button>
+                            <button class="btn-secondary flex items-center gap-2" onclick="pushToGitHub()" title="Push changes to GitHub" style="padding:8px 14px;border-color:rgba(255,183,77,0.3);color:#ffb74d;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">cloud_upload</span>
+                                PUSH
+                            </button>
+                            <button class="btn-primary flex items-center gap-2" onclick="switchTab('editor')">
+                                <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+                                NEW POST
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -761,6 +771,10 @@
                             <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">photo_library</span>
                             Media
                         </button>
+                        <button class="dash-tab" data-tab="github" onclick="switchTab('github')">
+                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:6px;">cloud_sync</span>
+                            GitHub Sync
+                        </button>
                     </div>
                 </section>
 
@@ -795,6 +809,19 @@
                             <span class="font-jetbrains text-xs text-on-surface-variant uppercase" style="letter-spacing:0.1em;">Tags:</span>
                             <div class="flex flex-wrap gap-2" id="editorTags"></div>
                             <input type="text" class="editor-input" style="font-size:0.8rem;width:160px;padding:6px 0;" placeholder="Add tag..." id="editorTagInput">
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mt-6 flex items-center gap-3">
+                            <span class="font-jetbrains text-xs text-on-surface-variant uppercase" style="letter-spacing:0.1em;">Category:</span>
+                            <select id="editorCategory" class="editor-input" style="font-size:0.8rem;width:200px;padding:6px 8px;background:var(--surface-container-low);color:var(--on-surface);border:1px solid rgba(72,72,73,0.3);font-family:'JetBrains Mono',monospace;">
+                                <option value="grc">GRC</option>
+                                <option value="cloud-security">Cloud Security</option>
+                                <option value="compliance">Compliance</option>
+                                <option value="threat-hunting">Threat Hunting</option>
+                                <option value="iam">IAM</option>
+                                <option value="tools">Tools</option>
+                            </select>
                         </div>
 
                         <!-- Featured Image -->
@@ -901,6 +928,76 @@
                     </div>
                 </section>
 
+                <!-- ============ TAB: GITHUB SYNC ============ -->
+                <section class="px-6 sm:px-8 lg:px-12 py-8" id="tab-github" style="display:none;">
+                    <div class="max-w-4xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <div class="font-jetbrains text-xs" style="color:var(--secondary);letter-spacing:0.1em;text-transform:uppercase;">// GITHUB_SYNC</div>
+                                <p class="text-on-surface-variant text-sm mt-1">Push &amp; pull blog posts to/from your GitHub CMS repository.</p>
+                            </div>
+                        </div>
+
+                        <!-- Token Config -->
+                        <div style="background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);padding:24px;margin-bottom:24px;">
+                            <div class="font-jetbrains text-xs text-on-surface-variant uppercase mb-4" style="letter-spacing:0.1em;">GitHub Configuration</div>
+                            <div class="flex flex-col gap-4">
+                                <div>
+                                    <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.05em;">Personal Access Token</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="password" id="ghToken" class="editor-input" style="flex:1;font-size:0.8rem;padding:8px 12px;font-family:'JetBrains Mono',monospace;" placeholder="ghp_xxxxxxxxxxxx or github_pat_xxxx">
+                                        <button class="btn-secondary" onclick="toggleTokenVisibility()" style="padding:8px 12px;white-space:nowrap;">
+                                            <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;" id="tokenEyeIcon">visibility</span>
+                                        </button>
+                                        <button class="btn-primary" onclick="saveGitHubToken()" style="padding:8px 16px;white-space:nowrap;">SAVE</button>
+                                    </div>
+                                    <p class="text-xs text-outline mt-2">Token needs <code style="color:var(--tertiary);">repo</code> scope for the <code style="color:var(--tertiary);">msk-blog-data</code> repository.</p>
+                                </div>
+                                <div class="flex gap-4 flex-wrap">
+                                    <div>
+                                        <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.05em;">Owner</label>
+                                        <input type="text" id="ghOwner" class="editor-input" style="font-size:0.8rem;padding:8px 12px;width:200px;font-family:'JetBrains Mono',monospace;" value="madhavaa07">
+                                    </div>
+                                    <div>
+                                        <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.05em;">Repository</label>
+                                        <input type="text" id="ghRepo" class="editor-input" style="font-size:0.8rem;padding:8px 12px;width:200px;font-family:'JetBrains Mono',monospace;" value="msk-blog-data">
+                                    </div>
+                                    <div>
+                                        <label class="font-jetbrains text-xs text-on-surface-variant" style="letter-spacing:0.05em;">File Path</label>
+                                        <input type="text" id="ghFilePath" class="editor-input" style="font-size:0.8rem;padding:8px 12px;width:200px;font-family:'JetBrains Mono',monospace;" value="posts.json">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sync Actions -->
+                        <div style="background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);padding:24px;margin-bottom:24px;">
+                            <div class="font-jetbrains text-xs text-on-surface-variant uppercase mb-4" style="letter-spacing:0.1em;">Sync Actions</div>
+                            <div class="flex gap-4 flex-wrap">
+                                <button class="btn-primary flex items-center gap-2" onclick="pullFromGitHub()" id="btnPull">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">cloud_download</span>
+                                    PULL FROM GITHUB
+                                </button>
+                                <button class="btn-primary flex items-center gap-2" onclick="pushToGitHub()" id="btnPush" style="background:linear-gradient(135deg,#ffb74d 0%,#ff9800 100%);color:#1a1a1a;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span>
+                                    PUSH TO GITHUB
+                                </button>
+                            </div>
+                            <div id="ghSyncStatus" class="mt-4" style="display:none;">
+                                <div class="font-jetbrains text-xs" style="letter-spacing:0.05em;" id="ghSyncMessage"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sync Log -->
+                        <div style="background:var(--surface-container-low);border:1px solid rgba(72,72,73,0.15);padding:24px;">
+                            <div class="font-jetbrains text-xs text-on-surface-variant uppercase mb-4" style="letter-spacing:0.1em;">Sync Log</div>
+                            <div id="ghSyncLog" class="font-jetbrains text-xs" style="max-height:300px;overflow-y:auto;color:var(--on-surface-variant);line-height:1.8;">
+                                <div style="color:var(--outline);">// No sync activity yet. Pull or push to get started.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Footer -->
                 <footer class="px-6 sm:px-8 lg:px-12 py-12 sm:py-16 border-t border-outline-variant/20 bg-surface-container-low/30">
                     <div class="space-y-8">
@@ -993,6 +1090,8 @@
     fetch(POSTS_URL)
         .then(r => r.json())
         .then(data => {
+            // Store raw CMS data for round-trip editing
+            rawCmsPosts = data;
             posts = data.map((p, i) => ({
                 id: i + 1,
                 cmsId: p.id,
@@ -1002,7 +1101,10 @@
                 views: 0,
                 tags: p.tags || [],
                 category: p.category || '',
-                readTime: p.readTime || 5
+                readTime: p.readTime || 5,
+                content: p.content || '',
+                excerpt: p.excerpt || '',
+                imageUrl: p.imageUrl || ''
             }));
             renderPosts();
             // Fetch real pageview data from Goatcounter
@@ -1119,6 +1221,7 @@
         editingPostId = id;
         document.getElementById('editorTitle').value = post.title;
         document.getElementById('editorContent').value = post.content || '';
+        document.getElementById('editorCategory').value = post.category || 'grc';
         renderEditorTags(post.tags);
         switchTab('editor');
         showToast('Editing: ' + post.title, 'info');
@@ -1187,6 +1290,7 @@
     function clearEditor() {
         document.getElementById('editorTitle').value = '';
         document.getElementById('editorContent').value = '';
+        document.getElementById('editorCategory').value = 'grc';
         editorTags = [];
         renderEditorTags([]);
         editingPostId = null;
@@ -1377,15 +1481,19 @@
     function savePost(status, scheduledAt) {
         const title = document.getElementById('editorTitle').value.trim();
         const content = document.getElementById('editorContent').value.trim();
+        const category = document.getElementById('editorCategory').value;
         if (!title) { showToast('Title is required', 'error'); return; }
 
         const postData = {
             title,
             content,
+            category,
             tags: [...editorTags],
             status,
             date: new Date().toISOString().split('T')[0],
             views: 0,
+            readTime: Math.max(3, Math.ceil(content.split(/\s+/).length / 200)),
+            excerpt: content.replace(/<[^>]*>/g, '').substring(0, 200) + '...',
         };
 
         if (status === 'scheduled' && scheduledAt) {
@@ -1395,11 +1503,17 @@
         if (editingPostId) {
             const post = posts.find(p=>p.id===editingPostId);
             if (post) {
+                // Preserve existing CMS fields not in editor
+                postData.cmsId = post.cmsId;
+                postData.imageUrl = post.imageUrl;
+                postData.excerpt = post.excerpt || postData.excerpt;
                 Object.assign(post, postData);
             }
             editingPostId = null;
         } else {
             postData.id = Date.now();
+            postData.cmsId = 'post_' + Date.now() + '_' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30);
+            postData.imageUrl = 'https://picsum.photos/600/400?grayscale&random=' + Math.floor(Math.random() * 900 + 100);
             posts.unshift(postData);
         }
 
@@ -1559,9 +1673,270 @@
     setInterval(renderScheduledQueue, 60000);
 
     /* ═══════════════════════════════════════════
+       GITHUB SYNC — RAW CMS DATA STORE
+    ═══════════════════════════════════════════ */
+    let rawCmsPosts = []; // full CMS-format posts from GitHub
+
+    /* ═══════════════════════════════════════════
+       GITHUB SYNC — TOKEN MANAGEMENT
+    ═══════════════════════════════════════════ */
+    function loadGitHubConfig() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('msk_gh_config'));
+            if (saved) {
+                if (saved.token) document.getElementById('ghToken').value = saved.token;
+                if (saved.owner) document.getElementById('ghOwner').value = saved.owner;
+                if (saved.repo) document.getElementById('ghRepo').value = saved.repo;
+                if (saved.filePath) document.getElementById('ghFilePath').value = saved.filePath;
+            }
+        } catch(e) {}
+    }
+
+    function saveGitHubToken() {
+        const config = {
+            token: document.getElementById('ghToken').value.trim(),
+            owner: document.getElementById('ghOwner').value.trim(),
+            repo: document.getElementById('ghRepo').value.trim(),
+            filePath: document.getElementById('ghFilePath').value.trim()
+        };
+        if (!config.token) { showToast('Enter a GitHub token first', 'error'); return; }
+        localStorage.setItem('msk_gh_config', JSON.stringify(config));
+        showToast('GitHub config saved', 'success');
+        ghLog('Config saved — owner: ' + config.owner + ', repo: ' + config.repo);
+    }
+
+    function getGitHubConfig() {
+        try {
+            return JSON.parse(localStorage.getItem('msk_gh_config')) || {};
+        } catch(e) { return {}; }
+    }
+
+    function toggleTokenVisibility() {
+        const inp = document.getElementById('ghToken');
+        const icon = document.getElementById('tokenEyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            inp.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       GITHUB SYNC — LOG
+    ═══════════════════════════════════════════ */
+    function ghLog(msg, type) {
+        const log = document.getElementById('ghSyncLog');
+        const ts = new Date().toLocaleTimeString();
+        const color = type === 'error' ? 'var(--error)' : type === 'success' ? 'var(--primary)' : 'var(--on-surface-variant)';
+        log.innerHTML += '<div style="color:' + color + ';">[' + ts + '] ' + msg + '</div>';
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function ghSyncStatus(msg, type) {
+        const el = document.getElementById('ghSyncStatus');
+        const msgEl = document.getElementById('ghSyncMessage');
+        el.style.display = 'block';
+        msgEl.style.color = type === 'error' ? 'var(--error)' : type === 'success' ? 'var(--primary)' : 'var(--tertiary)';
+        msgEl.textContent = msg;
+    }
+
+    /* ═══════════════════════════════════════════
+       GITHUB SYNC — PULL FROM GITHUB
+    ═══════════════════════════════════════════ */
+    async function pullFromGitHub() {
+        const config = getGitHubConfig();
+        const btn = document.getElementById('btnPull');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;animation:spin 1s linear infinite;">sync</span> PULLING...';
+
+        ghLog('Pulling posts.json from ' + (config.owner || 'madhavaa07') + '/' + (config.repo || 'msk-blog-data') + '...');
+        ghSyncStatus('Pulling from GitHub...', 'info');
+
+        try {
+            // Use raw URL for the actual content (no token needed for public repos)
+            const owner = config.owner || 'madhavaa07';
+            const repo = config.repo || 'msk-blog-data';
+            const filePath = config.filePath || 'posts.json';
+            const rawUrl = 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/main/' + filePath + '?t=' + Date.now();
+
+            const resp = await fetch(rawUrl);
+            if (!resp.ok) throw new Error('Failed to fetch: ' + resp.status + ' ' + resp.statusText);
+
+            const data = await resp.json();
+            if (!Array.isArray(data)) throw new Error('Invalid posts.json format — expected array');
+
+            // Store the full raw CMS data
+            rawCmsPosts = data;
+
+            // Map to display format (preserving all CMS fields in rawCmsPosts)
+            posts = data.map((p, i) => ({
+                id: i + 1,
+                cmsId: p.id,
+                title: p.title,
+                status: p.status || 'published',
+                date: p.publishedAt ? p.publishedAt.split('T')[0] : p.createdAt ? p.createdAt.split('T')[0] : '—',
+                views: 0,
+                tags: p.tags || [],
+                category: p.category || '',
+                readTime: p.readTime || 5,
+                content: p.content || '',
+                excerpt: p.excerpt || '',
+                imageUrl: p.imageUrl || ''
+            }));
+
+            renderPosts();
+            fetchGoatcounterViews();
+
+            ghLog('Pulled ' + data.length + ' posts successfully', 'success');
+            ghSyncStatus('Pull complete — ' + data.length + ' posts loaded', 'success');
+            showToast('Pulled ' + data.length + ' posts from GitHub', 'success');
+        } catch(err) {
+            ghLog('Pull failed: ' + err.message, 'error');
+            ghSyncStatus('Pull failed: ' + err.message, 'error');
+            showToast('Pull failed: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">cloud_download</span> PULL FROM GITHUB';
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       GITHUB SYNC — PUSH TO GITHUB
+    ═══════════════════════════════════════════ */
+    async function pushToGitHub() {
+        const config = getGitHubConfig();
+        if (!config.token) {
+            showToast('Set your GitHub token first', 'error');
+            switchTab('github');
+            return;
+        }
+
+        const btn = document.getElementById('btnPush');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;animation:spin 1s linear infinite;">sync</span> PUSHING...';
+
+        const owner = config.owner || 'madhavaa07';
+        const repo = config.repo || 'msk-blog-data';
+        const filePath = config.filePath || 'posts.json';
+        const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + filePath;
+
+        ghLog('Pushing to ' + owner + '/' + repo + '/' + filePath + '...');
+        ghSyncStatus('Pushing to GitHub...', 'info');
+
+        try {
+            // Step 1: Get current file SHA
+            ghLog('Fetching current file SHA...');
+            const shaResp = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': 'Bearer ' + config.token,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (!shaResp.ok) throw new Error('Failed to get file info: ' + shaResp.status + ' ' + shaResp.statusText);
+            const shaData = await shaResp.json();
+            const currentSha = shaData.sha;
+            ghLog('Current SHA: ' + currentSha.substring(0, 7) + '...');
+
+            // Step 2: Build the CMS-format posts array from current dashboard state
+            const cmsData = buildCmsPostsArray();
+
+            // Step 3: Encode content as base64
+            const jsonContent = JSON.stringify(cmsData, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
+
+            // Step 4: Push via GitHub Contents API
+            ghLog('Uploading ' + cmsData.length + ' posts (' + Math.round(jsonContent.length / 1024) + ' KB)...');
+            const pushResp = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + config.token,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update posts.json via Blog Dashboard CMS',
+                    content: base64Content,
+                    sha: currentSha
+                })
+            });
+
+            if (!pushResp.ok) {
+                const errBody = await pushResp.json().catch(() => ({}));
+                throw new Error('Push failed: ' + pushResp.status + ' — ' + (errBody.message || pushResp.statusText));
+            }
+
+            const pushData = await pushResp.json();
+            ghLog('Push successful! New SHA: ' + pushData.content.sha.substring(0, 7) + '...', 'success');
+            ghSyncStatus('Push complete — ' + cmsData.length + ' posts published', 'success');
+            showToast('Pushed ' + cmsData.length + ' posts to GitHub!', 'success');
+
+        } catch(err) {
+            ghLog('Push failed: ' + err.message, 'error');
+            ghSyncStatus('Push failed: ' + err.message, 'error');
+            showToast('Push failed: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span> PUSH TO GITHUB';
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       GITHUB SYNC — BUILD CMS POSTS ARRAY
+    ═══════════════════════════════════════════ */
+    function buildCmsPostsArray() {
+        // Merge current dashboard posts with rawCmsPosts data
+        return posts.filter(p => p.status !== 'scheduled').map(p => {
+            // Try to find matching raw CMS post
+            const raw = rawCmsPosts.find(r => r.id === p.cmsId);
+
+            if (raw) {
+                // Update raw post with any editor changes
+                return {
+                    ...raw,
+                    title: p.title,
+                    content: p.content || raw.content,
+                    tags: p.tags || raw.tags,
+                    category: p.category || raw.category,
+                    status: p.status || raw.status,
+                    excerpt: p.excerpt || raw.excerpt,
+                    readTime: p.readTime || raw.readTime,
+                    imageUrl: p.imageUrl || raw.imageUrl
+                };
+            } else {
+                // New post created in editor — build full CMS format
+                const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const now = new Date().toISOString();
+                return {
+                    id: p.cmsId || ('post_' + Date.now() + '_' + slug.substring(0, 30)),
+                    title: p.title,
+                    excerpt: p.excerpt || p.title,
+                    content: p.content || '',
+                    category: p.category || 'grc',
+                    tags: p.tags || [],
+                    readTime: p.readTime || Math.max(3, Math.ceil((p.content || '').split(/\s+/).length / 200)),
+                    status: p.status || 'published',
+                    publishedAt: p.status === 'published' ? now : null,
+                    createdAt: now,
+                    imageUrl: p.imageUrl || ('https://picsum.photos/600/400?grayscale&random=' + Math.floor(Math.random() * 900 + 100))
+                };
+            }
+        });
+    }
+
+    /* ═══════════════════════════════════════════
+       SPIN ANIMATION FOR SYNC BUTTONS
+    ═══════════════════════════════════════════ */
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(spinStyle);
+
+    /* ═══════════════════════════════════════════
        INIT
     ═══════════════════════════════════════════ */
     loadScheduledPosts();
+    loadGitHubConfig();
     renderPosts();
     renderEditorTags([]);
     renderMedia();
