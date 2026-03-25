@@ -51,45 +51,26 @@
         ::-webkit-scrollbar-thumb { background: #484849; }
         ::-webkit-scrollbar-thumb:hover { background: #767576; }
 
-        .panel {
-            background: #131314;
-            border: 1px solid rgba(72,72,73,0.2);
-        }
+        .panel { background: #131314; border: 1px solid rgba(72,72,73,0.2); }
         .panel-header {
-            background: #1a191b;
-            border-bottom: 1px solid rgba(72,72,73,0.2);
-            padding: 12px 16px;
-            font-family: "JetBrains Mono", monospace;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8af2ff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: #1a191b; border-bottom: 1px solid rgba(72,72,73,0.2);
+            padding: 12px 16px; font-family: "JetBrains Mono", monospace;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #8af2ff; display: flex; align-items: center; gap: 8px;
         }
         .text-input {
-            background: #1a191b;
-            border: 1px solid #484849;
-            border-bottom: 2px solid #484849;
-            color: #fff;
-            font-family: "Inter", sans-serif;
-            padding: 10px 14px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-            width: 100%;
-            resize: vertical;
+            background: #1a191b; border: 1px solid #484849; border-bottom: 2px solid #484849;
+            color: #fff; font-family: "Inter", sans-serif; padding: 10px 14px;
+            font-size: 14px; outline: none; transition: all 0.3s ease; width: 100%; resize: vertical;
         }
         .text-input:focus { border-bottom-color: #00bdfd; background: #201f21; }
         .text-input::placeholder { color: #767576; font-family: "JetBrains Mono", monospace; font-size: 12px; }
 
         .btn-primary {
             background: linear-gradient(135deg, #9cff93 0%, #00fc40 100%);
-            color: #006413; border: none;
-            font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 12px;
-            text-transform: uppercase; letter-spacing: 1px; padding: 10px 20px;
-            cursor: pointer; transition: all 0.3s ease;
+            color: #006413; border: none; font-family: "Space Grotesk", sans-serif;
+            font-weight: 700; font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; padding: 10px 20px; cursor: pointer; transition: all 0.3s ease;
         }
         .btn-primary:hover { box-shadow: 0 0 20px rgba(156,255,147,0.4); transform: translateY(-1px); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -118,30 +99,13 @@
         }
         .drop-zone:hover, .drop-zone.dragover { border-color: #9cff93; background: rgba(156,255,147,0.03); }
 
-        .tab-btn {
-            background: transparent; border: none; color: #767576;
-            font-family: "JetBrains Mono", monospace; font-size: 11px;
-            text-transform: uppercase; letter-spacing: 1px; padding: 12px 20px;
-            cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent;
-        }
-        .tab-btn:hover { color: #adaaab; }
-        .tab-btn.active { color: #9cff93; border-bottom-color: #9cff93; }
-
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth overlay */
         #authOverlay { position: fixed; inset: 0; z-index: 9999; background: #0e0e0f; display: flex; align-items: center; justify-content: center; }
         #authOverlay.hidden { display: none; }
 
-        .output-section { background: #0e0e0f; border: 1px solid rgba(72,72,73,0.2); padding: 20px; white-space: pre-wrap; font-family: "Inter", sans-serif; font-size: 14px; line-height: 1.7; color: #adaaab; max-height: 500px; overflow-y: auto; }
-
-        @media (max-width: 1023px) {
-            .main-grid { grid-template-columns: 1fr !important; }
-        }
+        @media (max-width: 1023px) { .main-grid { grid-template-columns: 1fr !important; } }
     </style>
 </head>
 <body>
@@ -177,285 +141,144 @@
             </div>
         </header>
 
-        <!-- Mode Tabs -->
-        <div class="border-b border-outline-variant/20 bg-surface-container-low/30">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex">
-                <button class="tab-btn active" onclick="switchMode('tailor')" id="tab-tailor">
-                    <span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;">auto_fix_high</span>
-                    TAILOR RESUME
-                </button>
-                <button class="tab-btn" onclick="switchMode('score')" id="tab-score">
-                    <span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;">analytics</span>
-                    ATS SCORE
-                </button>
-                <button class="tab-btn" onclick="switchMode('package')" id="tab-package">
-                    <span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;">package_2</span>
-                    APPLY PACKAGE
-                </button>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <div class="flex-1">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
 
-                <!-- ═══════ TAILOR MODE ═══════ -->
-                <div id="mode-tailor" class="fade-in">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
-                        <!-- Left: Inputs -->
-                        <div class="space-y-4">
-                            <!-- Resume Upload -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">description</span>
-                                    MASTER RESUME
+                    <!-- Left Column: Inputs -->
+                    <div class="space-y-4">
+                        <!-- Resume Upload -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">description</span>
+                                YOUR RESUME
+                            </div>
+                            <div class="p-4">
+                                <div id="dropZone" class="drop-zone mb-3" onclick="document.getElementById('fileInput').click()">
+                                    <span class="material-symbols-outlined text-outline-variant mb-2" style="font-size:36px;">cloud_upload</span>
+                                    <div class="font-jetbrains text-xs text-on-surface-variant mb-1">DROP PDF / DOCX HERE OR CLICK TO UPLOAD</div>
+                                    <div class="font-jetbrains text-xs text-outline">Supports .pdf and .docx files</div>
+                                    <input type="file" id="fileInput" accept=".pdf,.docx" style="display:none" onchange="handleFileUpload(event)">
                                 </div>
-                                <div class="p-4">
-                                    <div id="dropZone" class="drop-zone mb-3" onclick="document.getElementById('fileInput').click()">
-                                        <span class="material-symbols-outlined text-outline-variant mb-2" style="font-size:36px;">cloud_upload</span>
-                                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">DROP PDF / DOCX HERE OR CLICK TO UPLOAD</div>
-                                        <div class="font-jetbrains text-xs text-outline">Supports .pdf and .docx files</div>
-                                        <input type="file" id="fileInput" accept=".pdf,.docx" style="display:none" onchange="handleFileUpload(event)">
-                                    </div>
-                                    <div class="font-jetbrains text-xs text-outline mb-2 text-center">— OR PASTE RESUME TEXT —</div>
-                                    <textarea id="resumeText" class="text-input" rows="8" placeholder="paste_resume_content_here..."></textarea>
-                                    <div class="flex items-center justify-between mt-2">
-                                        <span class="font-jetbrains text-xs text-outline" id="resumeStatus">NO RESUME LOADED</span>
-                                        <button class="btn-secondary" onclick="clearResume()">CLEAR</button>
-                                    </div>
+                                <div class="font-jetbrains text-xs text-outline mb-2 text-center">— OR PASTE RESUME TEXT —</div>
+                                <textarea id="resumeText" class="text-input" rows="8" placeholder="paste_resume_content_here..."></textarea>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="font-jetbrains text-xs text-outline" id="resumeStatus">NO RESUME LOADED</span>
+                                    <button class="btn-secondary" onclick="clearResume()">CLEAR</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Job Description -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">work</span>
-                                    TARGET JOB DESCRIPTION
+                        <!-- Job Description -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">work</span>
+                                TARGET JOB DESCRIPTION
+                            </div>
+                            <div class="p-4">
+                                <div class="flex gap-2 mb-3">
+                                    <button class="btn-secondary active" onclick="setJDSource('paste', this)" id="jdPasteBtn">PASTE</button>
+                                    <button class="btn-secondary" onclick="setJDSource('jobs', this)" id="jdJobsBtn">FROM JOBS DASHBOARD</button>
                                 </div>
-                                <div class="p-4">
-                                    <div class="flex gap-2 mb-3">
-                                        <button class="btn-secondary active" onclick="setJDSource('paste', this)" id="jdPasteBtn">PASTE</button>
-                                        <button class="btn-secondary" onclick="setJDSource('jobs', this)" id="jdJobsBtn">FROM JOBS DASHBOARD</button>
-                                    </div>
-                                    <div id="jdPasteArea">
-                                        <textarea id="jobDescription" class="text-input" rows="8" placeholder="paste_job_description_here..."></textarea>
-                                    </div>
-                                    <div id="jdJobsArea" style="display:none;">
-                                        <div id="savedJobsList" class="max-h-64 overflow-y-auto space-y-2">
-                                            <div class="text-center py-6 font-jetbrains text-xs text-outline">
-                                                Loading jobs from dashboard cache...
-                                            </div>
-                                        </div>
+                                <div id="jdPasteArea">
+                                    <textarea id="jobDescription" class="text-input" rows="8" placeholder="paste_job_description_here..."></textarea>
+                                </div>
+                                <div id="jdJobsArea" style="display:none;">
+                                    <div id="savedJobsList" class="max-h-64 overflow-y-auto space-y-2">
+                                        <div class="text-center py-6 font-jetbrains text-xs text-outline">Loading jobs from dashboard cache...</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right: Output -->
-                        <div class="space-y-4">
-                            <!-- AI Config -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">smart_toy</span>
-                                    AI ENGINE
+                        <!-- Scan Button -->
+                        <button class="btn-primary w-full flex items-center justify-center gap-2 py-4" onclick="runATSScore()" id="scoreBtn">
+                            <span class="material-symbols-outlined" style="font-size:18px;">query_stats</span>
+                            RUN ATS SCAN
+                        </button>
+                    </div>
+
+                    <!-- Right Column: Results -->
+                    <div id="scoreResults" style="display:none;" class="space-y-4 fade-in">
+                        <!-- Score Ring -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">speed</span>
+                                ATS COMPATIBILITY SCORE
+                            </div>
+                            <div class="p-6 flex items-center gap-8">
+                                <div class="score-ring">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" fill="none" stroke="#262627" stroke-width="8"/>
+                                        <circle cx="60" cy="60" r="52" fill="none" stroke="#9cff93" stroke-width="8" stroke-dasharray="327" stroke-dashoffset="327" id="scoreArc" stroke-linecap="square"/>
+                                    </svg>
+                                    <div class="score-text">
+                                        <span class="font-space text-3xl font-bold text-primary" id="scoreValue">0</span>
+                                        <span class="font-jetbrains text-xs text-outline">/100</span>
+                                    </div>
                                 </div>
-                                <div class="p-4">
-                                    <div class="flex gap-2 mb-3">
-                                        <button class="btn-secondary active" onclick="setAIEngine('anthropic', this)" id="aiAnthropicBtn">CLAUDE</button>
-                                        <button class="btn-secondary" onclick="setAIEngine('openai', this)" id="aiOpenaiBtn">OPENAI</button>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <input type="password" id="aiApiKey" class="text-input" placeholder="paste_api_key_here..." style="font-size:12px;">
-                                        <button class="btn-secondary" onclick="saveAIKey()">SAVE</button>
-                                    </div>
-                                    <div class="font-jetbrains text-xs text-outline mt-2" id="aiKeyStatus">NO KEY CONFIGURED</div>
+                                <div>
+                                    <div class="font-space text-lg font-semibold" id="scoreLabel">—</div>
+                                    <div class="font-inter text-sm text-on-surface-variant mt-1" id="scoreSummary">Run a scan to see your score</div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Action Button -->
-                            <button class="btn-primary w-full flex items-center justify-center gap-2 py-4" onclick="tailorResume()" id="tailorBtn">
-                                <span class="material-symbols-outlined" style="font-size:18px;">auto_fix_high</span>
-                                TAILOR RESUME TO JOB
-                            </button>
+                        <!-- Keyword Breakdown -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">key</span>
+                                KEYWORD ANALYSIS
+                            </div>
+                            <div class="p-4">
+                                <div class="mb-3">
+                                    <div class="font-jetbrains text-xs text-primary mb-2">MATCHED KEYWORDS</div>
+                                    <div id="matchedKeywords" class="flex flex-wrap gap-2">—</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="font-jetbrains text-xs text-red-400 mb-2">MISSING KEYWORDS</div>
+                                    <div id="missingKeywords" class="flex flex-wrap gap-2">—</div>
+                                </div>
+                                <div>
+                                    <div class="font-jetbrains text-xs text-yellow-400 mb-2">PARTIAL MATCHES</div>
+                                    <div id="partialKeywords" class="flex flex-wrap gap-2">—</div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <!-- Tailored Output -->
-                            <div class="panel" id="tailorOutput" style="display:none;">
-                                <div class="panel-header justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined" style="font-size:16px;">edit_document</span>
-                                        TAILORED RESUME
-                                    </div>
-                                    <button class="btn-secondary" onclick="copyOutput('tailoredContent')" style="padding:4px 10px;">
-                                        <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> COPY
-                                    </button>
-                                </div>
-                                <div class="p-4">
-                                    <div id="tailoredContent" class="output-section"></div>
-                                </div>
+                        <!-- Format Checks -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">checklist</span>
+                                FORMAT & STRUCTURE
+                            </div>
+                            <div class="p-4">
+                                <div id="formatChecks" class="space-y-2">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="material-symbols-outlined" style="font-size:16px;">lightbulb</span>
+                                RECOMMENDATIONS
+                            </div>
+                            <div class="p-4">
+                                <div id="recommendations" class="space-y-3 font-inter text-sm text-on-surface-variant">—</div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- ═══════ SCORE MODE ═══════ -->
-                <div id="mode-score" style="display:none;" class="fade-in">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
-                        <!-- Left: Inputs (reuses same data) -->
-                        <div class="space-y-4">
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">analytics</span>
-                                    ATS COMPATIBILITY SCANNER
-                                </div>
-                                <div class="p-4">
-                                    <p class="font-inter text-sm text-on-surface-variant mb-4">
-                                        Analyzes your resume against the job description for keyword matches, missing skills, and ATS formatting compatibility. No AI key needed.
-                                    </p>
-                                    <button class="btn-primary w-full flex items-center justify-center gap-2 py-4" onclick="runATSScore()" id="scoreBtn">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">query_stats</span>
-                                        RUN ATS SCAN
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Quick resume/JD status -->
-                            <div class="panel">
-                                <div class="p-4 space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-jetbrains text-xs text-on-surface-variant">RESUME:</span>
-                                        <span class="font-jetbrains text-xs" id="scoreResumeStatus">—</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-jetbrains text-xs text-on-surface-variant">JOB DESCRIPTION:</span>
-                                        <span class="font-jetbrains text-xs" id="scoreJDStatus">—</span>
-                                    </div>
-                                    <div class="font-jetbrains text-xs text-outline mt-2">
-                                        Tip: Load your resume and job description in the "Tailor Resume" tab first, then come here to score.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Score Results -->
-                        <div id="scoreResults" style="display:none;" class="space-y-4 fade-in">
-                            <!-- Score Ring -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">speed</span>
-                                    ATS SCORE
-                                </div>
-                                <div class="p-6 flex items-center gap-8">
-                                    <div class="score-ring">
-                                        <svg width="120" height="120" viewBox="0 0 120 120">
-                                            <circle cx="60" cy="60" r="52" fill="none" stroke="#262627" stroke-width="8"/>
-                                            <circle cx="60" cy="60" r="52" fill="none" stroke="#9cff93" stroke-width="8" stroke-dasharray="327" stroke-dashoffset="327" id="scoreArc" stroke-linecap="square"/>
-                                        </svg>
-                                        <div class="score-text">
-                                            <span class="font-space text-3xl font-bold text-primary" id="scoreValue">0</span>
-                                            <span class="font-jetbrains text-xs text-outline">/100</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="font-space text-lg font-semibold" id="scoreLabel">—</div>
-                                        <div class="font-inter text-sm text-on-surface-variant mt-1" id="scoreSummary">Run a scan to see your score</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Keyword Breakdown -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">key</span>
-                                    KEYWORD ANALYSIS
-                                </div>
-                                <div class="p-4">
-                                    <div class="mb-3">
-                                        <div class="font-jetbrains text-xs text-primary mb-2">MATCHED KEYWORDS</div>
-                                        <div id="matchedKeywords" class="flex flex-wrap gap-2">—</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="font-jetbrains text-xs text-red-400 mb-2">MISSING KEYWORDS</div>
-                                        <div id="missingKeywords" class="flex flex-wrap gap-2">—</div>
-                                    </div>
-                                    <div>
-                                        <div class="font-jetbrains text-xs text-yellow-400 mb-2">PARTIAL MATCHES</div>
-                                        <div id="partialKeywords" class="flex flex-wrap gap-2">—</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Format Checks -->
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">checklist</span>
-                                    FORMAT & STRUCTURE
-                                </div>
-                                <div class="p-4">
-                                    <div id="formatChecks" class="space-y-2">—</div>
-                                </div>
-                            </div>
+                    <!-- Placeholder when no results -->
+                    <div id="noResults" class="flex items-center justify-center">
+                        <div class="text-center py-20">
+                            <span class="material-symbols-outlined text-outline-variant mb-4" style="font-size:64px;">analytics</span>
+                            <div class="font-space text-lg text-on-surface-variant mb-2">Load your resume + job description</div>
+                            <div class="font-jetbrains text-xs text-outline">Then hit RUN ATS SCAN to see your compatibility score</div>
                         </div>
                     </div>
                 </div>
-
-                <!-- ═══════ PACKAGE MODE ═══════ -->
-                <div id="mode-package" style="display:none;" class="fade-in">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
-                        <!-- Left -->
-                        <div class="space-y-4">
-                            <div class="panel">
-                                <div class="panel-header">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">package_2</span>
-                                    ONE-CLICK APPLY PACKAGE
-                                </div>
-                                <div class="p-4">
-                                    <p class="font-inter text-sm text-on-surface-variant mb-4">
-                                        Generate a tailored resume AND a matching cover letter for the target job — ready to submit. Requires AI key.
-                                    </p>
-                                    <button class="btn-primary w-full flex items-center justify-center gap-2 py-4" onclick="generatePackage()" id="packageBtn">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">rocket_launch</span>
-                                        GENERATE APPLY PACKAGE
-                                    </button>
-                                    <div class="font-jetbrains text-xs text-outline mt-3 text-center">
-                                        Uses your resume + job description from the Tailor tab
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right -->
-                        <div class="space-y-4">
-                            <div class="panel" id="packageResumeOutput" style="display:none;">
-                                <div class="panel-header justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined" style="font-size:16px;">description</span>
-                                        TAILORED RESUME
-                                    </div>
-                                    <button class="btn-secondary" onclick="copyOutput('packageResumeContent')" style="padding:4px 10px;">
-                                        <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> COPY
-                                    </button>
-                                </div>
-                                <div class="p-4">
-                                    <div id="packageResumeContent" class="output-section" style="max-height:300px;"></div>
-                                </div>
-                            </div>
-                            <div class="panel" id="packageCoverOutput" style="display:none;">
-                                <div class="panel-header justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined" style="font-size:16px;">mail</span>
-                                        COVER LETTER
-                                    </div>
-                                    <button class="btn-secondary" onclick="copyOutput('packageCoverContent')" style="padding:4px 10px;">
-                                        <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> COPY
-                                    </button>
-                                </div>
-                                <div class="p-4">
-                                    <div id="packageCoverContent" class="output-section" style="max-height:300px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
@@ -463,7 +286,10 @@
         <footer class="border-t border-outline-variant/20 bg-surface-container-low/30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between flex-wrap gap-4">
                 <div class="font-jetbrains text-xs text-on-surface-variant">© 2024 MSK // RESUME_MARKETER v1.0</div>
-                <div id="footerTZ" class="font-jetbrains text-xs text-outline">TZ: —</div>
+                <div class="flex items-center gap-4">
+                    <div class="font-jetbrains text-xs text-outline">NO API NEEDED — 100% CLIENT-SIDE</div>
+                    <div id="footerTZ" class="font-jetbrains text-xs text-outline">TZ: —</div>
+                </div>
             </div>
         </footer>
     </div>
@@ -489,27 +315,6 @@
        STATE
     ═══════════════════════════════════════════ */
     let resumeContent = '';
-    let jobDescContent = '';
-    let aiEngine = localStorage.getItem('msk_ai_engine') || 'anthropic';
-    let aiKey = localStorage.getItem('msk_ai_key_' + aiEngine) || '';
-
-    /* ═══════════════════════════════════════════
-       TAB SWITCHING
-    ═══════════════════════════════════════════ */
-    function switchMode(mode) {
-        ['tailor', 'score', 'package'].forEach(m => {
-            document.getElementById('mode-' + m).style.display = m === mode ? 'block' : 'none';
-            document.getElementById('tab-' + m).classList.toggle('active', m === mode);
-        });
-        // Update score tab status
-        if (mode === 'score') {
-            document.getElementById('scoreResumeStatus').textContent = resumeContent ? `LOADED (${resumeContent.split(/\s+/).length} words)` : 'NOT LOADED';
-            document.getElementById('scoreResumeStatus').className = 'font-jetbrains text-xs ' + (resumeContent ? 'text-primary' : 'text-red-400');
-            const jd = getJobDescription();
-            document.getElementById('scoreJDStatus').textContent = jd ? `LOADED (${jd.split(/\s+/).length} words)` : 'NOT LOADED';
-            document.getElementById('scoreJDStatus').className = 'font-jetbrains text-xs ' + (jd ? 'text-primary' : 'text-red-400');
-        }
-    }
 
     /* ═══════════════════════════════════════════
        FILE UPLOAD (PDF / DOCX)
@@ -525,7 +330,6 @@
         const status = document.getElementById('resumeStatus');
         status.textContent = 'PARSING...';
         status.style.color = '#00bdfd';
-
         try {
             if (file.name.endsWith('.pdf')) {
                 const arrayBuffer = await file.arrayBuffer();
@@ -543,17 +347,13 @@
                 const result = await mammoth.extractRawText({ arrayBuffer });
                 resumeContent = result.value.trim();
             } else {
-                status.textContent = 'UNSUPPORTED FORMAT';
-                status.style.color = '#ff6b6b';
-                return;
+                status.textContent = 'UNSUPPORTED FORMAT'; status.style.color = '#ff6b6b'; return;
             }
-
             document.getElementById('resumeText').value = resumeContent;
             status.textContent = `LOADED: ${file.name} (${resumeContent.split(/\s+/).length} words)`;
             status.style.color = '#9cff93';
         } catch (err) {
-            status.textContent = 'PARSE ERROR: ' + err.message;
-            status.style.color = '#ff6b6b';
+            status.textContent = 'PARSE ERROR: ' + err.message; status.style.color = '#ff6b6b';
         }
     }
 
@@ -564,13 +364,12 @@
         document.getElementById('resumeStatus').style.color = '#767576';
     }
 
-    // Sync textarea with state
     document.getElementById('resumeText').addEventListener('input', function() { resumeContent = this.value; });
 
     /* ═══════════════════════════════════════════
        JOB DESCRIPTION SOURCE
     ═══════════════════════════════════════════ */
-    function setJDSource(source, btn) {
+    function setJDSource(source) {
         document.getElementById('jdPasteArea').style.display = source === 'paste' ? 'block' : 'none';
         document.getElementById('jdJobsArea').style.display = source === 'jobs' ? 'block' : 'none';
         document.getElementById('jdPasteBtn').classList.toggle('active', source === 'paste');
@@ -587,10 +386,7 @@
         }
         try {
             const { jobs } = JSON.parse(cached);
-            if (!jobs || jobs.length === 0) {
-                list.innerHTML = '<div class="text-center py-6 font-jetbrains text-xs text-outline">No jobs in cache.</div>';
-                return;
-            }
+            if (!jobs || !jobs.length) { list.innerHTML = '<div class="text-center py-6 font-jetbrains text-xs text-outline">No jobs in cache.</div>'; return; }
             list.innerHTML = jobs.slice(0, 20).map((job, i) => `
                 <div class="p-3 bg-surface-container-high border border-outline-variant/20 cursor-pointer hover:border-primary/50 transition-colors" onclick="selectJobFromCache(${i})">
                     <div class="font-space text-sm font-semibold text-on-surface">${escapeHtml(job.job_title || 'Untitled')}</div>
@@ -598,225 +394,69 @@
                     <div class="font-jetbrains text-xs text-outline mt-1">${escapeHtml((job.job_city || '') + (job.job_state ? ', ' + job.job_state : ''))}</div>
                 </div>
             `).join('');
-        } catch(e) {
-            list.innerHTML = '<div class="text-center py-6 font-jetbrains text-xs text-red-400">Error loading cached jobs.</div>';
-        }
+        } catch(e) { list.innerHTML = '<div class="text-center py-6 font-jetbrains text-xs text-red-400">Error loading cached jobs.</div>'; }
     }
 
     function selectJobFromCache(index) {
         const cached = JSON.parse(localStorage.getItem('msk_jobs_cache'));
         const job = cached.jobs[index];
         if (job) {
-            const desc = [
-                `Title: ${job.job_title}`,
-                `Company: ${job.employer_name}`,
-                `Location: ${job.job_city || ''}, ${job.job_state || ''}`,
-                `Type: ${job.job_employment_type || ''}`,
-                '',
-                job.job_description || 'No description available.'
+            document.getElementById('jobDescription').value = [
+                'Title: ' + job.job_title,
+                'Company: ' + job.employer_name,
+                'Location: ' + (job.job_city || '') + ', ' + (job.job_state || ''),
+                'Type: ' + (job.job_employment_type || ''),
+                '', job.job_description || 'No description available.'
             ].join('\n');
-            document.getElementById('jobDescription').value = desc;
-            jobDescContent = desc;
-            setJDSource('paste', null);
-            document.getElementById('jdPasteBtn').classList.add('active');
-            document.getElementById('jdJobsBtn').classList.remove('active');
+            setJDSource('paste');
         }
     }
 
-    function getJobDescription() {
-        return document.getElementById('jobDescription').value.trim() || jobDescContent;
-    }
-
-    function getResumeContent() {
-        return document.getElementById('resumeText').value.trim() || resumeContent;
-    }
+    function getResume() { return document.getElementById('resumeText').value.trim() || resumeContent; }
+    function getJD() { return document.getElementById('jobDescription').value.trim(); }
 
     /* ═══════════════════════════════════════════
-       AI ENGINE CONFIG
+       ATS SCORING ENGINE
     ═══════════════════════════════════════════ */
-    function setAIEngine(engine, btn) {
-        aiEngine = engine;
-        localStorage.setItem('msk_ai_engine', engine);
-        document.getElementById('aiAnthropicBtn').classList.toggle('active', engine === 'anthropic');
-        document.getElementById('aiOpenaiBtn').classList.toggle('active', engine === 'openai');
-        aiKey = localStorage.getItem('msk_ai_key_' + engine) || '';
-        document.getElementById('aiApiKey').value = aiKey ? '••••••••' : '';
-        updateAIKeyStatus();
-    }
-
-    function saveAIKey() {
-        const key = document.getElementById('aiApiKey').value.trim();
-        if (key && !key.includes('•')) {
-            aiKey = key;
-            localStorage.setItem('msk_ai_key_' + aiEngine, key);
-            document.getElementById('aiApiKey').value = '••••••••';
-        }
-        updateAIKeyStatus();
-    }
-
-    function updateAIKeyStatus() {
-        const el = document.getElementById('aiKeyStatus');
-        if (aiKey) {
-            el.textContent = aiEngine.toUpperCase() + ' KEY CONFIGURED';
-            el.style.color = '#9cff93';
-        } else {
-            el.textContent = 'NO KEY CONFIGURED';
-            el.style.color = '#767576';
-        }
-    }
-
-    // Init AI state
-    (function() {
-        setAIEngine(aiEngine, null);
-        if (aiKey) document.getElementById('aiApiKey').value = '••••••••';
-    })();
-
-    /* ═══════════════════════════════════════════
-       AI API CALL
-    ═══════════════════════════════════════════ */
-    async function callAI(prompt) {
-        if (!aiKey) throw new Error('No AI API key configured. Add your key in the AI Engine panel.');
-
-        if (aiEngine === 'anthropic') {
-            const res = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': aiKey,
-                    'anthropic-version': '2023-06-01',
-                    'anthropic-dangerous-direct-browser-access': 'true'
-                },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 4096,
-                    messages: [{ role: 'user', content: prompt }]
-                })
-            });
-            if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
-            const data = await res.json();
-            return data.content[0].text;
-        } else {
-            const res = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + aiKey },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: [{ role: 'user', content: prompt }],
-                    max_tokens: 4096
-                })
-            });
-            if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
-            const data = await res.json();
-            return data.choices[0].message.content;
-        }
-    }
-
-    /* ═══════════════════════════════════════════
-       TAILOR RESUME (AI)
-    ═══════════════════════════════════════════ */
-    async function tailorResume() {
-        const resume = getResumeContent();
-        const jd = getJobDescription();
+    function runATSScore() {
+        const resume = getResume();
+        const jd = getJD();
         if (!resume) return alert('Please load or paste your resume first.');
         if (!jd) return alert('Please provide a job description.');
 
-        const btn = document.getElementById('tailorBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="material-symbols-outlined spinner" style="font-size:18px;">refresh</span> TAILORING...';
-
-        try {
-            const prompt = `You are an expert resume writer and ATS optimization specialist.
-
-TASK: Rewrite the following resume to be perfectly tailored for the target job description.
-
-RULES:
-- Keep all factual information accurate — do NOT fabricate experience or skills the candidate doesn't have
-- Reorder bullet points to prioritize the most relevant experience
-- Incorporate keywords from the job description naturally into the resume
-- Quantify achievements where possible
-- Use strong action verbs
-- Keep the format clean and ATS-friendly (no tables, graphics, or special characters)
-- Match the job's terminology (e.g., if the JD says "stakeholder management", use that exact phrase)
-- Add a tailored Professional Summary at the top
-- Output the tailored resume in clean plain text format
-
-RESUME:
-${resume}
-
-JOB DESCRIPTION:
-${jd}
-
-Output ONLY the tailored resume — no explanations, no commentary.`;
-
-            const result = await callAI(prompt);
-            document.getElementById('tailoredContent').textContent = result;
-            document.getElementById('tailorOutput').style.display = 'block';
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">auto_fix_high</span> TAILOR RESUME TO JOB';
-        }
-    }
-
-    /* ═══════════════════════════════════════════
-       ATS SCORING (NO AI NEEDED)
-    ═══════════════════════════════════════════ */
-    function runATSScore() {
-        const resume = getResumeContent();
-        const jd = getJobDescription();
-        if (!resume) return alert('Please load or paste your resume in the Tailor Resume tab first.');
-        if (!jd) return alert('Please provide a job description in the Tailor Resume tab first.');
-
         document.getElementById('scoreResults').style.display = 'block';
+        document.getElementById('noResults').style.display = 'none';
 
         const resumeLower = resume.toLowerCase();
         const jdLower = jd.toLowerCase();
 
-        // Extract keywords from JD
+        // Stop words to filter out
         const stopWords = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','need','dare','ought','used','to','of','in','for','on','with','at','by','from','as','into','through','during','before','after','above','below','between','under','again','further','then','once','here','there','when','where','why','how','all','each','every','both','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','just','because','but','and','or','if','while','about','against','which','this','that','these','those','am','it','its','my','your','we','they','them','their','what','who','whom','up','out','off','over','any','also','our','you','i','me','he','she','her','him','his','job','work','working','required','requirements','experience','years','ability','strong','excellent','knowledge','skills','must','including','etc','well','within','across','ensure','support','provide','develop','manage','team','role','position','company','join','looking','ideal','candidate','responsible','responsibilities','qualifications','minimum','preferred','plus','bonus','equal','opportunity','employer']);
 
-        // Get meaningful JD keywords (2+ chars, not stopwords)
+        // Extract meaningful JD keywords
         const jdWords = jdLower.match(/[a-z][a-z-]+/g) || [];
         const jdFreq = {};
         jdWords.forEach(w => { if (!stopWords.has(w) && w.length > 2) jdFreq[w] = (jdFreq[w] || 0) + 1; });
 
-        // Get multi-word phrases from JD
-        const jdPhrases = [];
-        const phrasePatterns = jdLower.match(/[a-z][a-z-]+(?: [a-z][a-z-]+){1,3}/g) || [];
-        phrasePatterns.forEach(p => {
-            const words = p.split(' ').filter(w => !stopWords.has(w));
-            if (words.length >= 2) jdPhrases.push(words.join(' '));
-        });
-
-        // Top keywords by frequency
         const sortedKeywords = Object.entries(jdFreq).sort((a, b) => b[1] - a[1]).slice(0, 40);
-
-        const matched = [];
-        const missing = [];
-        const partial = [];
+        const matched = [], missing = [], partial = [];
 
         sortedKeywords.forEach(([word, freq]) => {
-            if (freq < 2 && word.length < 5) return; // skip rare short words
+            if (freq < 2 && word.length < 5) return;
             if (resumeLower.includes(word)) {
                 matched.push(word);
             } else {
-                // Check for partial matches (stem matching)
                 const stem = word.slice(0, Math.max(4, word.length - 2));
-                if (resumeLower.includes(stem)) {
-                    partial.push(word);
-                } else {
-                    missing.push(word);
-                }
+                if (resumeLower.includes(stem)) partial.push(word);
+                else missing.push(word);
             }
         });
 
         // Score calculation
-        const totalKeywords = matched.length + missing.length + partial.length;
-        let keywordScore = totalKeywords > 0 ? ((matched.length + partial.length * 0.5) / totalKeywords) * 100 : 0;
+        const totalKw = matched.length + missing.length + partial.length;
+        let kwScore = totalKw > 0 ? ((matched.length + partial.length * 0.5) / totalKw) * 100 : 0;
 
         // Format checks
-        const checks = [];
         const hasEmail = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(resume);
         const hasPhone = /[\d()+-]{10,}/.test(resume);
         const hasLinkedIn = /linkedin/i.test(resume);
@@ -825,32 +465,33 @@ Output ONLY the tailored resume — no explanations, no commentary.`;
         const hasNumbers = /\d+%|\$[\d,]+|\d+ (years|months|projects|clients|team)/i.test(resume);
         const hasSections = /\b(experience|education|skills|summary|certifications?|projects?)\b/i.test(resume);
 
-        checks.push({ label: 'Contact Email', pass: hasEmail });
-        checks.push({ label: 'Phone Number', pass: hasPhone });
-        checks.push({ label: 'LinkedIn Profile', pass: hasLinkedIn });
-        checks.push({ label: 'Word Count (300-800 ideal)', pass: wordCount >= 300 && wordCount <= 800, info: `${wordCount} words` });
-        checks.push({ label: 'Action Verbs Used', pass: hasActionVerbs });
-        checks.push({ label: 'Quantified Achievements', pass: hasNumbers });
-        checks.push({ label: 'Clear Section Headers', pass: hasSections });
+        const checks = [
+            { label: 'Contact Email', pass: hasEmail },
+            { label: 'Phone Number', pass: hasPhone },
+            { label: 'LinkedIn Profile', pass: hasLinkedIn },
+            { label: 'Word Count (300-800 ideal)', pass: wordCount >= 300 && wordCount <= 800, info: wordCount + ' words' },
+            { label: 'Action Verbs Used', pass: hasActionVerbs },
+            { label: 'Quantified Achievements', pass: hasNumbers },
+            { label: 'Clear Section Headers', pass: hasSections },
+        ];
 
-        const formatScore = (checks.filter(c => c.pass).length / checks.length) * 100;
-        const totalScore = Math.round(keywordScore * 0.7 + formatScore * 0.3);
+        const fmtScore = (checks.filter(c => c.pass).length / checks.length) * 100;
+        const totalScore = Math.round(kwScore * 0.7 + fmtScore * 0.3);
 
         // Render score ring
         const arc = document.getElementById('scoreArc');
-        const circumference = 327;
         arc.style.transition = 'stroke-dashoffset 1s ease';
-        arc.style.strokeDashoffset = circumference - (circumference * totalScore / 100);
+        arc.style.strokeDashoffset = 327 - (327 * totalScore / 100);
         arc.style.stroke = totalScore >= 75 ? '#9cff93' : totalScore >= 50 ? '#ffb74d' : '#ff6b6b';
 
         document.getElementById('scoreValue').textContent = totalScore;
         document.getElementById('scoreLabel').textContent = totalScore >= 75 ? 'Strong Match' : totalScore >= 50 ? 'Moderate Match' : 'Needs Work';
         document.getElementById('scoreLabel').style.color = totalScore >= 75 ? '#9cff93' : totalScore >= 50 ? '#ffb74d' : '#ff6b6b';
-        document.getElementById('scoreSummary').textContent = `Keyword match: ${Math.round(keywordScore)}% | Format: ${Math.round(formatScore)}%`;
+        document.getElementById('scoreSummary').textContent = `Keyword match: ${Math.round(kwScore)}% | Format: ${Math.round(fmtScore)}%`;
 
         // Render keywords
         document.getElementById('matchedKeywords').innerHTML = matched.length ? matched.map(w => `<span class="tag tag-match">${w}</span>`).join('') : '<span class="font-jetbrains text-xs text-outline">None found</span>';
-        document.getElementById('missingKeywords').innerHTML = missing.length ? missing.map(w => `<span class="tag tag-missing">${w}</span>`).join('') : '<span class="font-jetbrains text-xs text-outline">None — great!</span>';
+        document.getElementById('missingKeywords').innerHTML = missing.length ? missing.map(w => `<span class="tag tag-missing">${w}</span>`).join('') : '<span class="font-jetbrains text-xs text-primary">None — great!</span>';
         document.getElementById('partialKeywords').innerHTML = partial.length ? partial.map(w => `<span class="tag tag-partial">${w}</span>`).join('') : '<span class="font-jetbrains text-xs text-outline">None</span>';
 
         // Render format checks
@@ -861,96 +502,31 @@ Output ONLY the tailored resume — no explanations, no commentary.`;
                 ${c.info ? `<span class="font-jetbrains text-xs text-outline ml-auto">${c.info}</span>` : ''}
             </div>
         `).join('');
-    }
 
-    /* ═══════════════════════════════════════════
-       APPLY PACKAGE (AI)
-    ═══════════════════════════════════════════ */
-    async function generatePackage() {
-        const resume = getResumeContent();
-        const jd = getJobDescription();
-        if (!resume) return alert('Please load or paste your resume in the Tailor Resume tab first.');
-        if (!jd) return alert('Please provide a job description in the Tailor Resume tab first.');
+        // Recommendations
+        const recs = [];
+        if (missing.length > 5) recs.push('Your resume is missing several key terms from the job description. Try incorporating these naturally: <strong class="text-red-400">' + missing.slice(0, 5).join(', ') + '</strong>.');
+        else if (missing.length > 0) recs.push('A few keywords are missing. Consider adding: <strong class="text-red-400">' + missing.join(', ') + '</strong>.');
+        if (!hasNumbers) recs.push('Add quantified achievements (percentages, dollar amounts, team sizes) to strengthen your impact statements.');
+        if (!hasActionVerbs) recs.push('Start bullet points with strong action verbs like "Led", "Implemented", "Optimized", or "Delivered".');
+        if (!hasLinkedIn) recs.push('Include your LinkedIn profile URL in the contact section.');
+        if (wordCount < 300) recs.push('Your resume seems short (' + wordCount + ' words). Consider adding more detail about your accomplishments.');
+        if (wordCount > 800) recs.push('Your resume is quite long (' + wordCount + ' words). Consider trimming less relevant experience to keep it focused.');
+        if (totalScore >= 75) recs.push('Your resume is a strong match for this role. Focus on the missing keywords above to push it even higher.');
+        if (recs.length === 0) recs.push('Your resume looks well-optimized for this job. Great work!');
 
-        const btn = document.getElementById('packageBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="material-symbols-outlined spinner" style="font-size:18px;">refresh</span> GENERATING...';
-
-        try {
-            const prompt = `You are an expert resume writer and cover letter specialist.
-
-TASK: Create a complete apply package for the following job:
-
-1. TAILORED RESUME: Rewrite the resume to be perfectly optimized for this job.
-   - Keep all facts accurate, do not fabricate
-   - Incorporate job keywords naturally
-   - Reorder to prioritize relevant experience
-   - Add a tailored Professional Summary
-   - Use ATS-friendly plain text format
-
-2. COVER LETTER: Write a compelling, personalized cover letter.
-   - Address the hiring manager (use "Dear Hiring Manager" if name unknown)
-   - Opening: Hook with relevant achievement or genuine enthusiasm
-   - Body: Connect 2-3 key qualifications to their specific requirements
-   - Close: Clear call to action
-   - Keep it under 350 words
-   - Professional but not generic — show you understand their needs
-   - Do NOT use clichés like "I am writing to express my interest"
-
-RESUME:
-${resume}
-
-JOB DESCRIPTION:
-${jd}
-
-Format your response EXACTLY like this:
-===TAILORED RESUME===
-[The tailored resume here]
-
-===COVER LETTER===
-[The cover letter here]`;
-
-            const result = await callAI(prompt);
-
-            // Parse the two sections
-            const resumePart = result.split('===COVER LETTER===')[0].replace('===TAILORED RESUME===', '').trim();
-            const coverPart = result.split('===COVER LETTER===')[1]?.trim() || 'Cover letter generation failed. Try again.';
-
-            document.getElementById('packageResumeContent').textContent = resumePart;
-            document.getElementById('packageCoverContent').textContent = coverPart;
-            document.getElementById('packageResumeOutput').style.display = 'block';
-            document.getElementById('packageCoverOutput').style.display = 'block';
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">rocket_launch</span> GENERATE APPLY PACKAGE';
-        }
+        document.getElementById('recommendations').innerHTML = recs.map(r => `<div class="flex gap-2"><span class="material-symbols-outlined text-secondary flex-shrink-0" style="font-size:16px;margin-top:2px;">arrow_right</span><span>${r}</span></div>`).join('');
     }
 
     /* ═══════════════════════════════════════════
        UTILITIES
     ═══════════════════════════════════════════ */
-    function copyOutput(id) {
-        const text = document.getElementById(id).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = event.target.closest('button');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">check</span> COPIED';
-            setTimeout(() => btn.innerHTML = orig, 2000);
-        });
-    }
-
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
     /* ═══════════════════════════════════════════
        TIMEZONE
     ═══════════════════════════════════════════ */
-    (function updateFooterTZ() {
+    (function() {
         const el = document.getElementById('footerTZ');
         if (!el) return;
         const now = new Date();
