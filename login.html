@@ -479,8 +479,22 @@
         }
 
         /* Remove default input styles */
-        input {
+        input, select {
             border-radius: 0px !important;
+        }
+
+        select.form-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239cff93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        select.form-input option {
+            background: #262627;
+            color: #ffffff;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 12px;
         }
 
         button {
@@ -613,6 +627,22 @@
 
                 <!-- Login form -->
                 <form id="loginForm">
+                    <!-- Operator Role -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Operator</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <span class="material-symbols-outlined">badge</span>
+                            </span>
+                            <select id="roleField" class="form-input" style="padding-left:40px;cursor:pointer;appearance:none;-webkit-appearance:none;">
+                                <option value="super_admin">SUPER ADMIN</option>
+                                <option value="recruiter">RECRUITER</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Username field -->
                     <div class="form-group">
                         <label class="form-label">
@@ -743,9 +773,11 @@
     <div class="auth-toast" id="authToast"></div>
 
     <script>
-        // Seeded credentials (hashed for minimal obfuscation)
-        const _k = atob('bWFkaGF2YWE=');    // madhavaa
-        const _v = atob('WXRzYW5AMjAyNg=='); // Ytsan@2026
+        // Seeded credentials (base64 for minimal obfuscation)
+        const CREDS = {
+            super_admin: { user: atob('bWFkaGF2YWE='), pass: atob('WXRzYW5AMjAyNg==') },
+            recruiter:   { user: atob('dmVua2F0'),     pass: atob('TGFuZEBzdW1tZXIyMDI1') }
+        };
 
         function showToast(msg, type) {
             const toast = document.getElementById('authToast');
@@ -759,7 +791,8 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const username = document.getElementById('usernameField').value.trim();
+            const role = document.getElementById('roleField').value;
+            const username = document.getElementById('usernameField').value.trim().toLowerCase();
             const password = document.getElementById('passwordField').value;
             const persistent = document.getElementById('persistentSession').checked;
             const button = document.querySelector('.cta-button');
@@ -770,29 +803,34 @@
             button.style.opacity = '0.7';
 
             setTimeout(() => {
-                if (username === _k && password === _v) {
+                const cred = CREDS[role];
+                if (cred && username === cred.user && password === cred.pass) {
                     // SUCCESS
                     button.innerHTML = '<span style="color:#006413">ACCESS GRANTED</span>';
                     button.style.opacity = '1';
                     showToast('Authentication successful — redirecting...', 'success');
 
+                    const sessionData = {
+                        user: username,
+                        role: role,
+                        ts: Date.now()
+                    };
+
                     // Store session
                     if (persistent) {
-                        localStorage.setItem('msk_auth', JSON.stringify({
-                            user: username,
-                            ts: Date.now(),
-                            persistent: true
-                        }));
+                        sessionData.persistent = true;
+                        localStorage.setItem('msk_auth', JSON.stringify(sessionData));
                     } else {
-                        sessionStorage.setItem('msk_auth', JSON.stringify({
-                            user: username,
-                            ts: Date.now()
-                        }));
+                        sessionStorage.setItem('msk_auth', JSON.stringify(sessionData));
                     }
 
-                    // Redirect to dashboard after brief pause
+                    // Route based on role
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        if (role === 'recruiter') {
+                            window.location.href = 'jobs.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
                     }, 1200);
                 } else {
                     // FAILED

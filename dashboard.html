@@ -1185,6 +1185,14 @@
             return;
         }
 
+        // Block recruiter access to dashboard
+        if (session.role === 'recruiter') {
+            overlay.classList.remove('hidden');
+            content.style.display = 'none';
+            setTimeout(() => { window.location.href = 'jobs.html'; }, 1200);
+            return;
+        }
+
         overlay.classList.add('hidden');
         content.style.display = 'block';
         userEl.textContent = 'operator: ' + session.user;

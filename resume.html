@@ -132,7 +132,7 @@
                             <span class="material-symbols-outlined" style="font-size:14px;">work</span>
                             JOBS
                         </a>
-                        <a href="dashboard.html" class="font-jetbrains text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
+                        <a href="dashboard.html" class="admin-only font-jetbrains text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
                             <span class="material-symbols-outlined" style="font-size:14px;">dashboard</span>
                             CMS
                         </a>
@@ -305,7 +305,14 @@
         if (session) {
             try {
                 const data = JSON.parse(session);
-                if (data.user) { overlay.classList.add('hidden'); content.style.display = 'flex'; return; }
+                if (data.user) {
+                        overlay.classList.add('hidden');
+                        content.style.display = 'flex';
+                        if (data.role === 'recruiter') {
+                            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                        }
+                        return;
+                    }
             } catch(e) {}
         }
         window.location.href = 'login.html';
