@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSK - Application Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9cff93",
+                        "primary-container": "#00fc40",
+                        "secondary": "#00bdfd",
+                        "tertiary": "#8af2ff",
+                        "surface": "#0e0e0f",
+                        "surface-container-low": "#131314",
+                        "surface-container": "#1a191b",
+                        "surface-container-high": "#201f21",
+                        "surface-container-highest": "#262627",
+                        "on-surface": "#ffffff",
+                        "on-surface-variant": "#adaaab",
+                        "on-primary": "#006413",
+                        "outline": "#767576",
+                        "outline-variant": "#484849",
+                    },
+                    fontFamily: {
+                        "space": ["Space Grotesk", "sans-serif"],
+                        "inter": ["Inter", "sans-serif"],
+                        "jetbrains": ["JetBrains Mono", "monospace"],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { border-radius: 0px !important; }
+        body { background: #0e0e0f; color: #fff; font-family: "Inter", sans-serif; }
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle, rgba(72,72,73,0.05) 1px, transparent 1px);
+            background-size: 24px 24px; pointer-events: none; z-index: 0;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #131314; }
+        ::-webkit-scrollbar-thumb { background: #484849; }
+        ::-webkit-scrollbar-thumb:hover { background: #767576; }
+
+        .pulse-dot {
+            width: 8px; height: 8px; background: #9cff93;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* Auth overlay */
+        #authOverlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0e0e0f;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #authOverlay.hidden { display: none; }
+
+        /* Status badges */
+        .status-badge {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .status-badge:hover { transform: translateY(-1px); }
+
+        .status-applied { color: #9cff93; border-color: rgba(156,255,147,0.4); background: rgba(156,255,147,0.08); }
+        .status-not_applied { color: #adaaab; border-color: rgba(72,72,73,0.4); background: rgba(72,72,73,0.08); }
+        .status-rejected { color: #ff6b6b; border-color: rgba(255,107,107,0.4); background: rgba(255,107,107,0.08); }
+        .status-no_response { color: #ffd93d; border-color: rgba(255,217,61,0.4); background: rgba(255,217,61,0.08); }
+        .status-ghosting { color: #c084fc; border-color: rgba(192,132,252,0.4); background: rgba(192,132,252,0.08); }
+
+        /* Filter buttons */
+        .filter-btn {
+            background: #1a191b;
+            border: 1px solid #484849;
+            color: #adaaab;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-btn:hover { border-color: #767576; color: #fff; }
+        .filter-btn.active { background: rgba(156,255,147,0.1); border-color: #9cff93; color: #9cff93; }
+
+        /* Tracker row */
+        .tracker-row {
+            background: #131314;
+            border: 1px solid rgba(72,72,73,0.2);
+            transition: all 0.3s ease;
+        }
+        .tracker-row:hover {
+            border-color: rgba(156,255,147,0.3);
+            box-shadow: 0 0 15px rgba(156,255,147,0.04);
+        }
+
+        /* Add form */
+        .add-form {
+            background: #131314;
+            border: 1px solid rgba(0,189,253,0.3);
+            box-shadow: 0 0 30px rgba(0,189,253,0.06);
+        }
+
+        .form-input-tracker {
+            background: #262627;
+            border: none;
+            border-bottom: 2px solid #484849;
+            color: #fff;
+            font-family: "Inter", sans-serif;
+            padding: 10px 12px;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .form-input-tracker:focus { border-bottom-color: #00bdfd; background: #201f21; }
+        .form-input-tracker::placeholder { color: #767576; font-family: "JetBrains Mono", monospace; font-size: 11px; }
+
+        select.form-input-tracker {
+            appearance: none; -webkit-appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239cff93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+        select.form-input-tracker option {
+            background: #262627; color: #fff; font-family: "JetBrains Mono", monospace; font-size: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9cff93 0%, #00fc40 100%);
+            color: #006413;
+            border: none;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(156,255,147,0.4); transform: translateY(-1px); }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #484849;
+            color: #adaaab;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            padding: 9px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-secondary:hover { border-color: #767576; color: #fff; }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid rgba(255,107,107,0.3);
+            color: #ff6b6b;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-danger:hover { background: rgba(255,107,107,0.1); border-color: #ff6b6b; }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: #131314;
+            border: 1px solid rgba(72,72,73,0.2);
+            padding: 16px 20px;
+            transition: all 0.3s ease;
+        }
+        .kpi-card:hover { border-color: rgba(156,255,147,0.2); }
+
+        /* Status dropdown */
+        .status-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 100;
+            background: #1a191b;
+            border: 1px solid #484849;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            min-width: 180px;
+        }
+        .status-dropdown-item {
+            padding: 8px 14px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dropdown-item:hover { background: #262627; }
+
+        /* Notes textarea */
+        textarea.form-input-tracker {
+            resize: vertical;
+            min-height: 60px;
+            font-size: 12px;
+        }
+
+        /* Modal overlay for report */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #131314;
+            border: 1px solid rgba(72,72,73,0.3);
+            max-width: 900px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 60px rgba(0,0,0,0.5);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            padding: 12px 20px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: rgba(156,255,147,0.1); border-color: rgba(156,255,147,0.4); color: #9cff93; }
+        .toast.error { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tracker-row .row-actions { flex-direction: column; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .tracker-table-header { display: none; }
+            .tracker-row-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+            .mobile-label { display: inline !important; }
+        }
+        @media (max-width: 480px) {
+            .kpi-grid { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay">
+        <div class="text-center">
+            <div class="font-space text-4xl font-bold text-primary mb-3">MSK</div>
+            <div class="font-jetbrains text-xs text-tertiary tracking-widest">AUTHENTICATING...</div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="min-h-screen flex flex-col" style="display:none;">
+        <!-- Header -->
+        <header class="border-b border-outline-variant/20 bg-surface-container-low/50 backdrop-blur-sm sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-4">
+                        <a href="dashboard.html" class="font-space text-xl font-bold text-primary hover:text-primary-container transition-colors admin-only">MSK</a>
+                        <a href="jobs.html" class="font-space text-xl font-bold text-primary hover:text-primary-container transition-colors recruiter-home" style="display:none;">MSK</a>
+                        <span class="font-jetbrains text-xs text-outline-variant tracking-widest hidden sm:inline">//</span>
+                        <span class="font-jetbrains text-xs text-tertiary tracking-widest hidden sm:inline">APPLICATION_TRACKER</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 border border-outline-variant/20">
+                            <div class="pulse-dot"></div>
+                            <span class="font-jetbrains text-xs text-primary" id="userDisplay">OPERATOR</span>
+                        </div>
+                        <a href="jobs.html" class="font-jetbrains text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
+                            <span class="material-symbols-outlined" style="font-size:14px;">work</span>
+                            JOBS
+                        </a>
+                        <a href="resume.html" class="font-jetbrains text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
+                            <span class="material-symbols-outlined" style="font-size:14px;">description</span>
+                            ATS
+                        </a>
+                        <a href="dashboard.html" class="admin-only font-jetbrains text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
+                            <span class="material-symbols-outlined" style="font-size:14px;">dashboard</span>
+                            CMS
+                        </a>
+                        <button onclick="logout()" class="font-jetbrains text-xs text-on-surface-variant hover:text-red-400 transition-colors flex items-center gap-1 px-3 py-1.5 border border-outline-variant/20 bg-surface-container">
+                            <span class="material-symbols-outlined" style="font-size:14px;">logout</span>
+                            EXIT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI Cards -->
+        <div class="border-b border-outline-variant/20 bg-surface-container-low/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+                <div class="kpi-grid grid grid-cols-5 gap-3" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="kpi-card">
+                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">TOTAL</div>
+                        <div class="font-space text-2xl font-bold text-on-surface" id="kpiTotal">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 2px solid rgba(156,255,147,0.4);">
+                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">APPLIED</div>
+                        <div class="font-space text-2xl font-bold text-primary" id="kpiApplied">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 2px solid rgba(255,107,107,0.4);">
+                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">REJECTED</div>
+                        <div class="font-space text-2xl font-bold" style="color:#ff6b6b;" id="kpiRejected">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 2px solid rgba(255,217,61,0.4);">
+                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">NO RESPONSE</div>
+                        <div class="font-space text-2xl font-bold" style="color:#ffd93d;" id="kpiNoResponse">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 2px solid rgba(192,132,252,0.4);">
+                        <div class="font-jetbrains text-xs text-on-surface-variant mb-1">GHOSTING</div>
+                        <div class="font-space text-2xl font-bold" style="color:#c084fc;" id="kpiGhosting">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="border-b border-outline-variant/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center justify-between">
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="filter-btn active" onclick="setFilter('all', this)">ALL</button>
+                        <button class="filter-btn" onclick="setFilter('applied', this)">APPLIED</button>
+                        <button class="filter-btn" onclick="setFilter('not_applied', this)">NOT APPLIED</button>
+                        <button class="filter-btn" onclick="setFilter('rejected', this)">REJECTED</button>
+                        <button class="filter-btn" onclick="setFilter('no_response', this)">NO RESPONSE</button>
+                        <button class="filter-btn" onclick="setFilter('ghosting', this)">GHOSTING</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleAddForm()" class="btn-primary flex items-center gap-2" id="addBtn">
+                            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+                            ADD JOB
+                        </button>
+                        <button onclick="importFromJobs()" class="btn-secondary flex items-center gap-2">
+                            <span class="material-symbols-outlined" style="font-size:14px;">download</span>
+                            IMPORT
+                        </button>
+                        <button onclick="generateReport()" class="btn-secondary flex items-center gap-2">
+                            <span class="material-symbols-outlined" style="font-size:14px;">summarize</span>
+                            REPORT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Job Form (hidden by default) -->
+                <div id="addForm" class="add-form p-5 mb-4" style="display:none;">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-secondary" style="font-size:18px;">add_circle</span>
+                        <span class="font-jetbrains text-xs text-secondary tracking-widest">NEW_APPLICATION_ENTRY</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                        <input type="text" id="formCompany" class="form-input-tracker" placeholder="company_name">
+                        <input type="text" id="formTitle" class="form-input-tracker" placeholder="job_title">
+                        <input type="text" id="formLocation" class="form-input-tracker" placeholder="location (e.g. Remote, NYC)">
+                        <select id="formStatus" class="form-input-tracker">
+                            <option value="not_applied">NOT APPLIED</option>
+                            <option value="applied">APPLIED</option>
+                            <option value="rejected">REJECTED</option>
+                            <option value="no_response">NO RESPONSE</option>
+                            <option value="ghosting">GHOSTING</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="formUrl" class="form-input-tracker" placeholder="job_url (optional)">
+                        <input type="text" id="formSource" class="form-input-tracker" placeholder="source (LinkedIn, Indeed, etc.)">
+                    </div>
+                    <div class="mb-3">
+                        <textarea id="formNotes" class="form-input-tracker" placeholder="notes (optional)"></textarea>
+                    </div>
+                    <div class="flex gap-2 justify-end">
+                        <button onclick="toggleAddForm()" class="btn-secondary">CANCEL</button>
+                        <button onclick="addApplication()" class="btn-primary">SAVE ENTRY</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Header -->
+        <div class="tracker-table-header border-b border-outline-variant/20 bg-surface-container-low/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                <div class="tracker-row-grid grid items-center gap-4" style="grid-template-columns: 2fr 2fr 1fr 1fr 1fr 120px;">
+                    <span class="font-jetbrains text-xs text-outline tracking-wider">COMPANY</span>
+                    <span class="font-jetbrains text-xs text-outline tracking-wider">POSITION</span>
+                    <span class="font-jetbrains text-xs text-outline tracking-wider">LOCATION</span>
+                    <span class="font-jetbrains text-xs text-outline tracking-wider">STATUS</span>
+                    <span class="font-jetbrains text-xs text-outline tracking-wider">UPDATED</span>
+                    <span class="font-jetbrains text-xs text-outline tracking-wider text-right">ACTIONS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Listings -->
+        <div class="flex-1">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div id="trackerList" class="space-y-2">
+                    <!-- Entries render here -->
+                </div>
+                <div id="emptyState" class="text-center py-20">
+                    <span class="material-symbols-outlined text-outline-variant mb-4" style="font-size:48px;">assignment</span>
+                    <div class="font-space text-lg text-on-surface-variant mb-2">No applications tracked yet</div>
+                    <div class="font-jetbrains text-xs text-outline mb-4">Click ADD JOB or IMPORT to get started</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="border-t border-outline-variant/20 bg-surface-container-low/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between flex-wrap gap-4">
+                <div class="font-jetbrains text-xs text-on-surface-variant">&copy; 2024 MSK // APPLICATION_TRACKER v1.0</div>
+                <div class="flex items-center gap-4">
+                    <div id="footerTZ" class="font-jetbrains text-xs text-outline">TZ: &mdash;</div>
+                    <div class="font-jetbrains text-xs text-outline">LOCAL_STORAGE</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Report Modal (hidden) -->
+    <div id="reportModal" style="display:none;"></div>
+
+    <script>
+    /* ═══════════════════════════════════════════
+       STORAGE KEY
+    ═══════════════════════════════════════════ */
+    const STORAGE_KEY = 'msk_tracker_data';
+    let applications = [];
+    let currentFilter = 'all';
+    let editingId = null;
+
+    /* ═══════════════════════════════════════════
+       AUTH GUARD
+    ═══════════════════════════════════════════ */
+    (function authGuard() {
+        const overlay = document.getElementById('authOverlay');
+        const content = document.getElementById('mainContent');
+        const session = sessionStorage.getItem('msk_auth') || localStorage.getItem('msk_auth');
+        if (session) {
+            try {
+                const data = JSON.parse(session);
+                if (data.user) {
+                    overlay.classList.add('hidden');
+                    content.style.display = 'flex';
+                    document.getElementById('userDisplay').textContent = data.user.toUpperCase();
+                    // Hide admin-only elements for recruiters
+                    if (data.role === 'recruiter') {
+                        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                        document.querySelectorAll('.recruiter-home').forEach(el => el.style.display = '');
+                    } else {
+                        document.querySelectorAll('.recruiter-home').forEach(el => el.style.display = 'none');
+                    }
+                    return;
+                }
+            } catch(e) {}
+        }
+        window.location.href = 'login.html';
+    })();
+
+    /* ═══════════════════════════════════════════
+       DATA MANAGEMENT
+    ═══════════════════════════════════════════ */
+    function loadData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            applications = raw ? JSON.parse(raw) : [];
+        } catch(e) {
+            applications = [];
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    }
+
+    function generateId() {
+        return 'app_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast ' + type;
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    /* ═══════════════════════════════════════════
+       ADD / EDIT
+    ═══════════════════════════════════════════ */
+    function toggleAddForm() {
+        const form = document.getElementById('addForm');
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            editingId = null;
+            clearForm();
+        } else {
+            form.style.display = 'none';
+            editingId = null;
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('formCompany').value = '';
+        document.getElementById('formTitle').value = '';
+        document.getElementById('formLocation').value = '';
+        document.getElementById('formStatus').value = 'not_applied';
+        document.getElementById('formUrl').value = '';
+        document.getElementById('formSource').value = '';
+        document.getElementById('formNotes').value = '';
+    }
+
+    function addApplication() {
+        const company = document.getElementById('formCompany').value.trim();
+        const title = document.getElementById('formTitle').value.trim();
+        const location = document.getElementById('formLocation').value.trim();
+        const status = document.getElementById('formStatus').value;
+        const url = document.getElementById('formUrl').value.trim();
+        const source = document.getElementById('formSource').value.trim();
+        const notes = document.getElementById('formNotes').value.trim();
+
+        if (!company || !title) {
+            showToast('Company and job title are required', 'error');
+            return;
+        }
+
+        if (editingId) {
+            // Update existing
+            const idx = applications.findIndex(a => a.id === editingId);
+            if (idx > -1) {
+                applications[idx] = {
+                    ...applications[idx],
+                    company, title, location, status, url, source, notes,
+                    updated: new Date().toISOString()
+                };
+                // Add to history
+                if (!applications[idx].history) applications[idx].history = [];
+                applications[idx].history.push({ status, date: new Date().toISOString() });
+            }
+            showToast('Entry updated', 'success');
+            editingId = null;
+        } else {
+            // New entry
+            const entry = {
+                id: generateId(),
+                company, title, location, status, url, source, notes,
+                created: new Date().toISOString(),
+                updated: new Date().toISOString(),
+                history: [{ status, date: new Date().toISOString() }]
+            };
+            applications.unshift(entry);
+            showToast('Application added', 'success');
+        }
+
+        saveData();
+        document.getElementById('addForm').style.display = 'none';
+        render();
+    }
+
+    function editEntry(id) {
+        const entry = applications.find(a => a.id === id);
+        if (!entry) return;
+
+        editingId = id;
+        document.getElementById('formCompany').value = entry.company;
+        document.getElementById('formTitle').value = entry.title;
+        document.getElementById('formLocation').value = entry.location || '';
+        document.getElementById('formStatus').value = entry.status;
+        document.getElementById('formUrl').value = entry.url || '';
+        document.getElementById('formSource').value = entry.source || '';
+        document.getElementById('formNotes').value = entry.notes || '';
+        document.getElementById('addForm').style.display = 'block';
+        document.getElementById('addForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteEntry(id) {
+        if (!confirm('Remove this application entry?')) return;
+        applications = applications.filter(a => a.id !== id);
+        saveData();
+        render();
+        showToast('Entry removed', 'success');
+    }
+
+    /* ═══════════════════════════════════════════
+       STATUS UPDATE (INLINE)
+    ═══════════════════════════════════════════ */
+    function toggleStatusDropdown(id, event) {
+        event.stopPropagation();
+        // Close any open
+        document.querySelectorAll('.status-dropdown').forEach(d => d.remove());
+
+        const entry = applications.find(a => a.id === id);
+        if (!entry) return;
+
+        const statuses = ['applied', 'not_applied', 'rejected', 'no_response', 'ghosting'];
+        const labels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
+        const colors = { applied: '#9cff93', not_applied: '#adaaab', rejected: '#ff6b6b', no_response: '#ffd93d', ghosting: '#c084fc' };
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'status-dropdown';
+        statuses.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'status-dropdown-item';
+            item.innerHTML = `<span style="width:8px;height:8px;background:${colors[s]};display:inline-block;"></span> ${labels[s]}`;
+            if (s === entry.status) item.style.background = '#262627';
+            item.onclick = (e) => {
+                e.stopPropagation();
+                updateStatus(id, s);
+                dropdown.remove();
+            };
+            dropdown.appendChild(item);
+        });
+
+        const badge = event.currentTarget;
+        badge.style.position = 'relative';
+        badge.appendChild(dropdown);
+
+        // Close on outside click
+        setTimeout(() => {
+            document.addEventListener('click', function closeDD() {
+                dropdown.remove();
+                document.removeEventListener('click', closeDD);
+            }, { once: true });
+        }, 10);
+    }
+
+    function updateStatus(id, newStatus) {
+        const idx = applications.findIndex(a => a.id === id);
+        if (idx > -1) {
+            applications[idx].status = newStatus;
+            applications[idx].updated = new Date().toISOString();
+            if (!applications[idx].history) applications[idx].history = [];
+            applications[idx].history.push({ status: newStatus, date: new Date().toISOString() });
+            saveData();
+            render();
+            showToast('Status updated → ' + newStatus.replace('_', ' ').toUpperCase(), 'success');
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       IMPORT FROM JOBS DASHBOARD
+    ═══════════════════════════════════════════ */
+    function importFromJobs() {
+        try {
+            const cached = localStorage.getItem('msk_jobs_cache');
+            if (!cached) {
+                showToast('No jobs in cache — visit Jobs Dashboard first', 'error');
+                return;
+            }
+            const jobs = JSON.parse(cached);
+            if (!Array.isArray(jobs) || jobs.length === 0) {
+                showToast('Job cache is empty', 'error');
+                return;
+            }
+
+            // Get existing URLs to avoid duplicates
+            const existingUrls = new Set(applications.map(a => a.url).filter(Boolean));
+            let imported = 0;
+
+            jobs.forEach(job => {
+                const url = job.job_apply_link || job.job_google_link || '';
+                if (url && existingUrls.has(url)) return; // skip dupes
+
+                const entry = {
+                    id: generateId(),
+                    company: job.employer_name || 'Unknown',
+                    title: job.job_title || 'Untitled',
+                    location: job.job_city ? (job.job_city + (job.job_state ? ', ' + job.job_state : '')) : (job.job_is_remote ? 'Remote' : ''),
+                    status: 'not_applied',
+                    url: url,
+                    source: job.job_publisher || 'JSearch',
+                    notes: '',
+                    created: new Date().toISOString(),
+                    updated: new Date().toISOString(),
+                    history: [{ status: 'not_applied', date: new Date().toISOString() }]
+                };
+                applications.unshift(entry);
+                imported++;
+            });
+
+            if (imported > 0) {
+                saveData();
+                render();
+                showToast(`Imported ${imported} jobs from dashboard`, 'success');
+            } else {
+                showToast('All jobs already imported', 'error');
+            }
+        } catch(e) {
+            showToast('Import failed — ' + e.message, 'error');
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       FILTER
+    ═══════════════════════════════════════════ */
+    function setFilter(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        render();
+    }
+
+    function getFiltered() {
+        if (currentFilter === 'all') return applications;
+        return applications.filter(a => a.status === currentFilter);
+    }
+
+    /* ═══════════════════════════════════════════
+       RENDER
+    ═══════════════════════════════════════════ */
+    function render() {
+        const list = document.getElementById('trackerList');
+        const empty = document.getElementById('emptyState');
+        const filtered = getFiltered();
+
+        // KPI
+        const counts = { total: applications.length, applied: 0, rejected: 0, no_response: 0, ghosting: 0, not_applied: 0 };
+        applications.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
+        document.getElementById('kpiTotal').textContent = counts.total;
+        document.getElementById('kpiApplied').textContent = counts.applied;
+        document.getElementById('kpiRejected').textContent = counts.rejected;
+        document.getElementById('kpiNoResponse').textContent = counts.no_response;
+        document.getElementById('kpiGhosting').textContent = counts.ghosting;
+
+        if (filtered.length === 0) {
+            list.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+        const statusLabels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
+
+        list.innerHTML = filtered.map(app => {
+            const updated = new Date(app.updated);
+            const timeAgo = getTimeAgo(updated);
+            return `
+            <div class="tracker-row p-4">
+                <div class="tracker-row-grid grid items-center gap-4" style="grid-template-columns: 2fr 2fr 1fr 1fr 1fr 120px;">
+                    <div>
+                        <span class="mobile-label font-jetbrains text-xs text-outline" style="display:none;">COMPANY: </span>
+                        <div class="font-space text-sm font-semibold text-on-surface">${escapeHtml(app.company)}</div>
+                        ${app.source ? `<div class="font-jetbrains text-xs text-outline mt-0.5">${escapeHtml(app.source)}</div>` : ''}
+                    </div>
+                    <div>
+                        <span class="mobile-label font-jetbrains text-xs text-outline" style="display:none;">POSITION: </span>
+                        <div class="font-inter text-sm text-on-surface-variant">${escapeHtml(app.title)}</div>
+                        ${app.notes ? `<div class="font-jetbrains text-xs text-outline mt-0.5 truncate max-w-xs" title="${escapeHtml(app.notes)}">${escapeHtml(app.notes)}</div>` : ''}
+                    </div>
+                    <div>
+                        <span class="mobile-label font-jetbrains text-xs text-outline" style="display:none;">LOC: </span>
+                        <span class="font-jetbrains text-xs text-on-surface-variant">${escapeHtml(app.location || '—')}</span>
+                    </div>
+                    <div>
+                        <span class="mobile-label font-jetbrains text-xs text-outline" style="display:none;">STATUS: </span>
+                        <span class="status-badge status-${app.status}" onclick="toggleStatusDropdown('${app.id}', event)">
+                            <span style="width:6px;height:6px;background:currentColor;display:inline-block;"></span>
+                            ${statusLabels[app.status] || app.status}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="mobile-label font-jetbrains text-xs text-outline" style="display:none;">UPDATED: </span>
+                        <span class="font-jetbrains text-xs text-outline">${timeAgo}</span>
+                    </div>
+                    <div class="flex items-center gap-1 justify-end row-actions">
+                        ${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" class="btn-secondary" style="padding:6px 8px;" title="Open job posting"><span class="material-symbols-outlined" style="font-size:14px;">open_in_new</span></a>` : ''}
+                        <button onclick="editEntry('${app.id}')" class="btn-secondary" style="padding:6px 8px;" title="Edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span></button>
+                        <button onclick="deleteEntry('${app.id}')" class="btn-danger" style="padding:6px 8px;" title="Delete"><span class="material-symbols-outlined" style="font-size:14px;">delete</span></button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function getTimeAgo(date) {
+        const diff = Date.now() - date.getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return mins + 'm ago';
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + 'h ago';
+        const days = Math.floor(hrs / 24);
+        if (days < 30) return days + 'd ago';
+        return date.toLocaleDateString();
+    }
+
+    /* ═══════════════════════════════════════════
+       REPORT GENERATOR
+    ═══════════════════════════════════════════ */
+    function generateReport() {
+        if (applications.length === 0) {
+            showToast('No data to generate report', 'error');
+            return;
+        }
+
+        const counts = { applied: 0, not_applied: 0, rejected: 0, no_response: 0, ghosting: 0 };
+        applications.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
+        const total = applications.length;
+
+        const statusLabels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
+        const statusColors = { applied: '#9cff93', not_applied: '#adaaab', rejected: '#ff6b6b', no_response: '#ffd93d', ghosting: '#c084fc' };
+
+        // Group entries by status
+        const grouped = {};
+        Object.keys(counts).forEach(s => { grouped[s] = applications.filter(a => a.status === s); });
+
+        // Source breakdown
+        const sources = {};
+        applications.forEach(a => {
+            const src = a.source || 'Unknown';
+            sources[src] = (sources[src] || 0) + 1;
+        });
+
+        // Build report HTML
+        let reportHTML = `
+        <div class="modal-overlay" onclick="closeReport(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="p-6 border-b border-outline-variant/20 flex items-center justify-between">
+                    <div>
+                        <div class="font-space text-lg font-bold text-on-surface">Application Status Report</div>
+                        <div class="font-jetbrains text-xs text-outline mt-1">Generated: ${new Date().toLocaleString()} | Total Applications: ${total}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="downloadReport()" class="btn-primary flex items-center gap-2" style="padding:8px 14px;">
+                            <span class="material-symbols-outlined" style="font-size:14px;">download</span>
+                            DOWNLOAD CSV
+                        </button>
+                        <button onclick="closeReport()" class="btn-secondary" style="padding:8px 14px;">CLOSE</button>
+                    </div>
+                </div>
+
+                <!-- Visual Summary -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <div class="font-jetbrains text-xs text-secondary tracking-widest mb-4">STATUS BREAKDOWN</div>
+                    <div class="space-y-3">
+                        ${Object.keys(counts).map(s => {
+                            const pct = total > 0 ? ((counts[s] / total) * 100).toFixed(1) : 0;
+                            return `
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-jetbrains text-xs" style="color:${statusColors[s]}">${statusLabels[s]}</span>
+                                    <span class="font-jetbrains text-xs text-on-surface-variant">${counts[s]} (${pct}%)</span>
+                                </div>
+                                <div style="height:6px;background:#262627;width:100%;">
+                                    <div style="height:100%;width:${pct}%;background:${statusColors[s]};transition:width 0.5s;"></div>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Source Breakdown -->
+                <div class="p-6 border-b border-outline-variant/20">
+                    <div class="font-jetbrains text-xs text-secondary tracking-widest mb-3">SOURCE BREAKDOWN</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${Object.entries(sources).sort((a,b) => b[1]-a[1]).map(([src, count]) => `
+                            <div class="bg-surface-container-highest px-3 py-2 border border-outline-variant/20">
+                                <div class="font-inter text-sm text-on-surface">${escapeHtml(src)}</div>
+                                <div class="font-jetbrains text-xs text-primary">${count} jobs</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Detailed Lists by Status -->
+                ${Object.keys(counts).map(s => {
+                    if (grouped[s].length === 0) return '';
+                    return `
+                    <div class="p-6 ${s !== 'ghosting' ? 'border-b border-outline-variant/20' : ''}">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span style="width:10px;height:10px;background:${statusColors[s]};display:inline-block;"></span>
+                            <span class="font-jetbrains text-xs tracking-widest" style="color:${statusColors[s]}">${statusLabels[s]} (${grouped[s].length})</span>
+                        </div>
+                        <div class="space-y-1">
+                            ${grouped[s].map(app => `
+                                <div class="flex items-center justify-between py-1.5 border-b border-outline-variant/10">
+                                    <div>
+                                        <span class="font-inter text-sm text-on-surface">${escapeHtml(app.company)}</span>
+                                        <span class="font-jetbrains text-xs text-outline ml-2">— ${escapeHtml(app.title)}</span>
+                                    </div>
+                                    <span class="font-jetbrains text-xs text-outline">${escapeHtml(app.location || '—')}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+
+        document.getElementById('reportModal').innerHTML = reportHTML;
+        document.getElementById('reportModal').style.display = 'block';
+    }
+
+    function closeReport(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('reportModal').style.display = 'none';
+    }
+
+    function downloadReport() {
+        const statusLabels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
+        const headers = ['Company', 'Position', 'Location', 'Status', 'Source', 'URL', 'Notes', 'Created', 'Last Updated'];
+        const rows = applications.map(a => [
+            a.company, a.title, a.location || '', statusLabels[a.status] || a.status,
+            a.source || '', a.url || '', (a.notes || '').replace(/"/g, '""'),
+            new Date(a.created).toLocaleString(), new Date(a.updated).toLocaleString()
+        ]);
+
+        let csv = headers.join(',') + '\n';
+        rows.forEach(r => {
+            csv += r.map(field => `"${field}"`).join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `msk_tracker_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Report downloaded as CSV', 'success');
+    }
+
+    /* ═══════════════════════════════════════════
+       LOGOUT
+    ═══════════════════════════════════════════ */
+    function logout() {
+        sessionStorage.removeItem('msk_auth');
+        localStorage.removeItem('msk_auth');
+        window.location.href = 'login.html';
+    }
+
+    /* ═══════════════════════════════════════════
+       TIMEZONE FOOTER
+    ═══════════════════════════════════════════ */
+    (function setFooterTZ() {
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const offset = new Date().getTimezoneOffset();
+            const sign = offset <= 0 ? '+' : '-';
+            const hrs = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
+            const mins = String(Math.abs(offset) % 60).padStart(2, '0');
+            const isDST = (() => {
+                const jan = new Date(new Date().getFullYear(), 0, 1).getTimezoneOffset();
+                const jul = new Date(new Date().getFullYear(), 6, 1).getTimezoneOffset();
+                return Math.max(jan, jul) !== offset;
+            })();
+            document.getElementById('footerTZ').textContent = `TZ: UTC${sign}${hrs}:${mins} (${tz})${isDST ? ' [DST]' : ''}`;
+        } catch(e) {
+            document.getElementById('footerTZ').textContent = 'TZ: LOCAL';
+        }
+    })();
+
+    /* ═══════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════ */
+    loadData();
+    render();
+    </script>
+    <script src="morph-scroll.js"></script>
+</body>
+</html>
