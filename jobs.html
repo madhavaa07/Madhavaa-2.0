@@ -399,7 +399,7 @@
 
         for (const query of queries) {
             try {
-                const response = await fetch(`https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=week`, {
+                const response = await fetch(`https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=all&country=us`, {
                     headers: {
                         'x-rapidapi-key': apiKey,
                         'x-rapidapi-host': 'jsearch.p.rapidapi.com'
@@ -416,6 +416,10 @@
                 }
 
                 const data = await response.json();
+                if (data.message) {
+                    console.error('API error:', data.message);
+                    continue;
+                }
                 if (data.data) {
                     for (const job of data.data) {
                         const id = job.job_id || (job.job_title + job.employer_name);
