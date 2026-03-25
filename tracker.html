@@ -1083,14 +1083,18 @@
                             <div class="font-inter text-xs text-on-surface-variant mt-0.5">${escapeHtml(app.title)} ${app.location ? '· ' + escapeHtml(app.location) : ''}</div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <button onclick="confirmApplication('${app.id}', true)" class="confirm-btn-yes flex items-center gap-1">
+                    <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                        <button onclick="confirmApplication('${app.id}', 'applied')" class="confirm-btn-yes flex items-center gap-1">
                             <span class="material-symbols-outlined" style="font-size:14px;">check</span>
                             YES, APPLIED
                         </button>
-                        <button onclick="confirmApplication('${app.id}', false)" class="confirm-btn-no flex items-center gap-1">
+                        <button onclick="confirmApplication('${app.id}', 'not_applied')" class="confirm-btn-no flex items-center gap-1">
                             <span class="material-symbols-outlined" style="font-size:14px;">close</span>
                             NOT YET
+                        </button>
+                        <button onclick="showCustomStatus('${app.id}')" class="confirm-btn-skip flex items-center gap-1" style="border-color:rgba(0,189,253,0.4);color:#00bdfd;">
+                            <span class="material-symbols-outlined" style="font-size:14px;">tune</span>
+                            CUSTOM
                         </button>
                         <button onclick="dismissPending('${app.id}')" class="confirm-btn-skip flex items-center gap-1">
                             <span class="material-symbols-outlined" style="font-size:14px;">remove</span>
@@ -1098,25 +1102,76 @@
                         </button>
                     </div>
                 </div>
+                <!-- Custom status panel (hidden by default) -->
+                <div id="custom-${app.id}" style="display:none;" class="mt-3 pt-3" style="border-top:1px solid rgba(72,72,73,0.2);">
+                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                        <div class="flex-shrink-0">
+                            <div class="font-jetbrains text-xs text-outline mb-1">STATUS</div>
+                            <select id="customStatus-${app.id}" class="form-input-tracker" style="width:180px;padding:8px 32px 8px 10px;font-size:12px;">
+                                <option value="rejected">REJECTED</option>
+                                <option value="no_response">NO RESPONSE</option>
+                                <option value="ghosting">GHOSTING</option>
+                                <option value="applied">APPLIED</option>
+                                <option value="not_applied">NOT APPLIED</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="font-jetbrains text-xs text-outline mb-1">NOTE <span style="color:#ff6b6b;">*</span></div>
+                            <input type="text" id="customNote-${app.id}" class="form-input-tracker" placeholder="required — add a note..." style="padding:8px 10px;font-size:12px;">
+                        </div>
+                        <button onclick="submitCustomStatus('${app.id}')" class="btn-primary flex items-center gap-1 flex-shrink-0" style="padding:8px 14px;">
+                            <span class="material-symbols-outlined" style="font-size:14px;">save</span>
+                            SAVE
+                        </button>
+                    </div>
+                </div>
             </div>
         `).join('');
     }
 
-    function confirmApplication(id, didApply) {
+    function showCustomStatus(id) {
+        const panel = document.getElementById('custom-' + id);
+        if (!panel) return;
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        if (panel.style.display === 'block') {
+            const noteInput = document.getElementById('customNote-' + id);
+            if (noteInput) noteInput.focus();
+        }
+    }
+
+    function submitCustomStatus(id) {
+        const statusEl = document.getElementById('customStatus-' + id);
+        const noteEl = document.getElementById('customNote-' + id);
+        if (!statusEl || !noteEl) return;
+
+        const note = noteEl.value.trim();
+        if (!note) {
+            noteEl.style.borderBottomColor = '#ff6b6b';
+            noteEl.placeholder = 'note is required!';
+            noteEl.focus();
+            return;
+        }
+
+        confirmApplication(id, statusEl.value, note);
+    }
+
+    function confirmApplication(id, status, note) {
         const idx = applications.findIndex(a => a.id === id);
         if (idx === -1) return;
 
-        const newStatus = didApply ? 'applied' : 'not_applied';
-        applications[idx].status = newStatus;
+        const statusLabels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
+
+        applications[idx].status = status;
         applications[idx].pending_confirmation = false;
         applications[idx].updated = new Date().toISOString();
+        if (note) applications[idx].notes = note;
         if (!applications[idx].history) applications[idx].history = [];
-        applications[idx].history.push({ status: newStatus, date: new Date().toISOString() });
+        applications[idx].history.push({ status: status, date: new Date().toISOString(), note: note || '' });
 
         saveData();
         render();
         renderPending();
-        showToast(didApply ? 'Marked as Applied' : 'Marked as Not Applied', 'success');
+        showToast('Marked as ' + (statusLabels[status] || status), 'success');
     }
 
     function dismissPending(id) {
