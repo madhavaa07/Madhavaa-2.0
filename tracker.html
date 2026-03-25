@@ -242,6 +242,57 @@
             box-shadow: 0 0 60px rgba(0,0,0,0.5);
         }
 
+        /* Pending confirmation banner */
+        .confirm-banner {
+            background: rgba(0,189,253,0.06);
+            border: 1px solid rgba(0,189,253,0.3);
+            animation: bannerPulse 3s ease-in-out infinite;
+        }
+        @keyframes bannerPulse {
+            0%, 100% { border-color: rgba(0,189,253,0.3); }
+            50% { border-color: rgba(0,189,253,0.6); }
+        }
+        .confirm-btn-yes {
+            background: linear-gradient(135deg, #9cff93 0%, #00fc40 100%);
+            color: #006413;
+            border: none;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .confirm-btn-yes:hover { box-shadow: 0 0 15px rgba(156,255,147,0.3); }
+        .confirm-btn-no {
+            background: transparent;
+            border: 1px solid rgba(255,107,107,0.4);
+            color: #ff6b6b;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .confirm-btn-no:hover { background: rgba(255,107,107,0.08); border-color: #ff6b6b; }
+        .confirm-btn-skip {
+            background: transparent;
+            border: 1px solid #484849;
+            color: #adaaab;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .confirm-btn-skip:hover { border-color: #767576; color: #fff; }
+
         /* Toast */
         .toast {
             position: fixed; top: 20px; right: 20px; z-index: 9999;
@@ -408,6 +459,19 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Pending Confirmations -->
+        <div id="pendingSection" style="display:none;">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-secondary" style="font-size:18px;">help_outline</span>
+                    <span class="font-jetbrains text-xs text-secondary tracking-widest">PENDING CONFIRMATIONS</span>
+                    <span class="font-jetbrains text-xs text-outline ml-2" id="pendingCount"></span>
+                </div>
+                <div id="pendingList" class="space-y-2"></div>
+            </div>
+            <div class="border-b border-outline-variant/20"></div>
         </div>
 
         <!-- Table Header -->
@@ -993,10 +1057,82 @@
     })();
 
     /* ═══════════════════════════════════════════
+       PENDING CONFIRMATIONS
+    ═══════════════════════════════════════════ */
+    function renderPending() {
+        const pending = applications.filter(a => a.pending_confirmation);
+        const section = document.getElementById('pendingSection');
+        const list = document.getElementById('pendingList');
+        const countEl = document.getElementById('pendingCount');
+
+        if (pending.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        countEl.textContent = `(${pending.length} job${pending.length > 1 ? 's' : ''})`;
+
+        list.innerHTML = pending.map(app => `
+            <div class="confirm-banner p-4" id="pending-${app.id}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="material-symbols-outlined text-secondary flex-shrink-0" style="font-size:24px;">help_outline</span>
+                        <div class="min-w-0">
+                            <div class="font-space text-sm font-semibold text-on-surface">Did you apply to <span class="text-secondary">${escapeHtml(app.company)}</span>?</div>
+                            <div class="font-inter text-xs text-on-surface-variant mt-0.5">${escapeHtml(app.title)} ${app.location ? '· ' + escapeHtml(app.location) : ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button onclick="confirmApplication('${app.id}', true)" class="confirm-btn-yes flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:14px;">check</span>
+                            YES, APPLIED
+                        </button>
+                        <button onclick="confirmApplication('${app.id}', false)" class="confirm-btn-no flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:14px;">close</span>
+                            NOT YET
+                        </button>
+                        <button onclick="dismissPending('${app.id}')" class="confirm-btn-skip flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:14px;">remove</span>
+                            REMOVE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function confirmApplication(id, didApply) {
+        const idx = applications.findIndex(a => a.id === id);
+        if (idx === -1) return;
+
+        const newStatus = didApply ? 'applied' : 'not_applied';
+        applications[idx].status = newStatus;
+        applications[idx].pending_confirmation = false;
+        applications[idx].updated = new Date().toISOString();
+        if (!applications[idx].history) applications[idx].history = [];
+        applications[idx].history.push({ status: newStatus, date: new Date().toISOString() });
+
+        saveData();
+        render();
+        renderPending();
+        showToast(didApply ? 'Marked as Applied' : 'Marked as Not Applied', 'success');
+    }
+
+    function dismissPending(id) {
+        applications = applications.filter(a => a.id !== id);
+        saveData();
+        render();
+        renderPending();
+        showToast('Entry removed', 'success');
+    }
+
+    /* ═══════════════════════════════════════════
        INIT
     ═══════════════════════════════════════════ */
     loadData();
     render();
+    renderPending();
     </script>
     <script src="morph-scroll.js"></script>
 </body>

@@ -162,6 +162,26 @@
             .job-card { padding: 16px !important; }
             .stats-bar { flex-wrap: wrap; gap: 8px !important; }
         }
+
+        /* Tracker toast */
+        .tracker-toast {
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            padding: 14px 20px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid rgba(156,255,147,0.4);
+            background: rgba(14,14,15,0.95);
+            color: #9cff93;
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+        .tracker-toast.show { transform: translateY(0); }
+        .tracker-toast .toast-icon { font-size: 18px; }
     </style>
 </head>
 <body>
@@ -511,8 +531,9 @@
             const isNew = isWithin24h(job.job_posted_at_datetime_utc);
             const type = job.job_employment_type || '';
 
+            const jobIdx = allJobs.indexOf(job);
             return `
-                <a href="${applyUrl}" target="_blank" rel="noopener noreferrer" class="job-card p-5 block">
+                <a href="${applyUrl}" target="_blank" rel="noopener noreferrer" class="job-card p-5 block" onclick="trackJobClick(${jobIdx})"
                     <div class="flex items-start gap-4">
                         ${logo ? `<img src="${logo}" alt="${company}" class="w-10 h-10 object-contain bg-surface-container-highest p-1 border border-outline-variant/20 flex-shrink-0 mt-1" onerror="this.style.display='none'">` : `<div class="w-10 h-10 bg-surface-container-highest border border-outline-variant/20 flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined text-outline" style="font-size:20px;">business</span></div>`}
                         <div class="flex-1 min-w-0">
@@ -690,6 +711,60 @@
         // Fresh fetch
         fetchJobs();
     })();
+
+    /* ═══════════════════════════════════════════
+       TRACK JOB CLICK → ADD TO TRACKER
+    ═══════════════════════════════════════════ */
+    function trackJobClick(jobIndex) {
+        const job = allJobs[jobIndex];
+        if (!job) return;
+
+        const TRACKER_KEY = 'msk_tracker_data';
+        let trackerData = [];
+        try { trackerData = JSON.parse(localStorage.getItem(TRACKER_KEY)) || []; } catch(e) { trackerData = []; }
+
+        // Check if already tracked by URL
+        const applyUrl = job.job_apply_link || job.job_google_link || '';
+        const alreadyTracked = trackerData.some(a => a.url && a.url === applyUrl);
+        if (alreadyTracked) {
+            showTrackerToast('Already in tracker', 'assignment_turned_in');
+            return; // let the link proceed
+        }
+
+        const entry = {
+            id: 'app_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            company: job.employer_name || 'Unknown',
+            title: job.job_title || 'Untitled',
+            location: job.job_city ? (job.job_city + (job.job_state ? ', ' + job.job_state : '')) : (job.job_is_remote ? 'Remote' : ''),
+            status: 'not_applied',
+            url: applyUrl,
+            source: job.job_publisher || 'JSearch',
+            notes: '',
+            created: new Date().toISOString(),
+            updated: new Date().toISOString(),
+            history: [{ status: 'not_applied', date: new Date().toISOString() }],
+            pending_confirmation: true
+        };
+
+        trackerData.unshift(entry);
+        localStorage.setItem(TRACKER_KEY, JSON.stringify(trackerData));
+        showTrackerToast('Added to tracker — confirm in Tracker', 'assignment_add');
+    }
+
+    function showTrackerToast(msg, icon) {
+        let toast = document.getElementById('trackerToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'trackerToast';
+            toast.className = 'tracker-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<span class="material-symbols-outlined toast-icon">${icon}</span><span>${msg}</span>`;
+        toast.classList.remove('show');
+        requestAnimationFrame(() => { toast.classList.add('show'); });
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
     </script>
 </body>
 </html>
