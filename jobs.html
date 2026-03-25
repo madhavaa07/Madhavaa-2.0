@@ -365,7 +365,7 @@
        FETCH JOBS
     ═══════════════════════════════════════════ */
     async function fetchJobs() {
-        const apiKey = localStorage.getItem('jsearch_api_key');
+        const apiKey = JSEARCH_API_KEY;
         if (!apiKey) { checkApiKey(); return; }
 
         const btn = document.getElementById('refreshBtn');
