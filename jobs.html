@@ -66,6 +66,38 @@
         }
         .apply-arrow { transition: all 0.3s ease; }
 
+        /* Locked job card — already in tracker */
+        .job-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: auto;
+            border-color: rgba(72,72,73,0.15);
+            position: relative;
+        }
+        .job-card.locked:hover {
+            border-color: rgba(192,132,252,0.4);
+            box-shadow: 0 0 15px rgba(192,132,252,0.08);
+            transform: none;
+        }
+        .job-card.locked:hover .apply-arrow { color: inherit; transform: none; }
+        .locked-badge {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 10px;
+            padding: 3px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .locked-badge-applied { color: #9cff93; border-color: rgba(156,255,147,0.3); background: rgba(156,255,147,0.06); }
+        .locked-badge-not_applied { color: #adaaab; border-color: rgba(72,72,73,0.3); background: rgba(72,72,73,0.06); }
+        .locked-badge-rejected { color: #ff6b6b; border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.06); }
+        .locked-badge-no_response { color: #ffd93d; border-color: rgba(255,217,61,0.3); background: rgba(255,217,61,0.06); }
+        .locked-badge-ghosting { color: #c084fc; border-color: rgba(192,132,252,0.3); background: rgba(192,132,252,0.06); }
+        .locked-badge-pending { color: #00bdfd; border-color: rgba(0,189,253,0.3); background: rgba(0,189,253,0.06); }
+
         .tag {
             background: #262627;
             border: 1px solid rgba(72,72,73,0.3);
@@ -496,9 +528,25 @@
     /* ═══════════════════════════════════════════
        RENDER JOBS
     ═══════════════════════════════════════════ */
+    /* Load tracker data for locking */
+    function getTrackerMap() {
+        const map = {};
+        try {
+            const raw = localStorage.getItem('msk_tracker_data');
+            if (raw) {
+                const entries = JSON.parse(raw);
+                entries.forEach(e => {
+                    if (e.url) map[e.url] = e;
+                });
+            }
+        } catch(e) {}
+        return map;
+    }
+
     function renderJobs() {
         const list = document.getElementById('jobsList');
         const empty = document.getElementById('emptyState');
+        const trackerMap = getTrackerMap();
 
         let filtered = allJobs;
         if (currentFilter !== 'all') {
@@ -517,6 +565,8 @@
             return;
         }
 
+        const statusLabels = { applied: 'APPLIED', not_applied: 'NOT APPLIED', rejected: 'REJECTED', no_response: 'NO RESPONSE', ghosting: 'GHOSTING' };
+
         empty.classList.add('hidden');
         list.innerHTML = filtered.map(job => {
             const title = job.job_title || 'Untitled Position';
@@ -532,8 +582,54 @@
             const type = job.job_employment_type || '';
 
             const jobIdx = allJobs.indexOf(job);
+            const tracked = trackerMap[applyUrl];
+            const isLocked = !!tracked;
+            const trackerStatus = tracked ? tracked.status : '';
+            const isPending = tracked ? !!tracked.pending_confirmation : false;
+            const badgeClass = isPending ? 'pending' : trackerStatus;
+            const badgeLabel = isPending ? 'PENDING' : (statusLabels[trackerStatus] || trackerStatus.toUpperCase());
+
+            if (isLocked) {
+                return `
+                <div class="job-card locked p-5 block" onclick="showLockedMessage(event)">
+                    <div class="flex items-start gap-4">
+                        ${logo ? `<img src="${logo}" alt="${company}" class="w-10 h-10 object-contain bg-surface-container-highest p-1 border border-outline-variant/20 flex-shrink-0 mt-1" onerror="this.style.display='none'">` : `<div class="w-10 h-10 bg-surface-container-highest border border-outline-variant/20 flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined text-outline" style="font-size:20px;">business</span></div>`}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="font-space text-base font-semibold text-on-surface truncate">${escapeHtml(title)}</div>
+                                    <div class="font-inter text-sm text-secondary mt-0.5">${escapeHtml(company)}</div>
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <span class="material-symbols-outlined" style="font-size:16px;color:#c084fc;">lock</span>
+                                    <span class="font-jetbrains text-xs text-on-surface-variant hidden sm:inline" style="color:#c084fc;">TRACKER</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 mt-2 flex-wrap">
+                                <div class="flex items-center gap-1 font-jetbrains text-xs text-on-surface-variant">
+                                    <span class="material-symbols-outlined" style="font-size:14px;">location_on</span>
+                                    ${escapeHtml(location)}
+                                </div>
+                                ${salary ? `<div class="flex items-center gap-1 font-jetbrains text-xs text-primary"><span class="material-symbols-outlined" style="font-size:14px;">payments</span>${salary}</div>` : ''}
+                                <div class="flex items-center gap-1 font-jetbrains text-xs text-on-surface-variant">
+                                    <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
+                                    ${posted}
+                                </div>
+                                ${source ? `<div class="font-jetbrains text-xs text-outline hidden sm:block">via ${escapeHtml(source)}</div>` : ''}
+                            </div>
+                            <div class="flex gap-2 mt-3 flex-wrap">
+                                <span class="locked-badge locked-badge-${badgeClass}"><span class="material-symbols-outlined" style="font-size:12px;">lock</span> ${badgeLabel}</span>
+                                ${isRemote ? '<span class="tag tag-remote">REMOTE</span>' : ''}
+                                ${type ? `<span class="tag">${formatType(type)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+
             return `
-                <a href="${applyUrl}" target="_blank" rel="noopener noreferrer" class="job-card p-5 block" onclick="trackJobClick(${jobIdx})"
+                <a href="${applyUrl}" target="_blank" rel="noopener noreferrer" class="job-card p-5 block" onclick="trackJobClick(${jobIdx})">
                     <div class="flex items-start gap-4">
                         ${logo ? `<img src="${logo}" alt="${company}" class="w-10 h-10 object-contain bg-surface-container-highest p-1 border border-outline-variant/20 flex-shrink-0 mt-1" onerror="this.style.display='none'">` : `<div class="w-10 h-10 bg-surface-container-highest border border-outline-variant/20 flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined text-outline" style="font-size:20px;">business</span></div>`}
                         <div class="flex-1 min-w-0">
@@ -711,6 +807,15 @@
         // Fresh fetch
         fetchJobs();
     })();
+
+    /* ═══════════════════════════════════════════
+       LOCKED JOB MESSAGE
+    ═══════════════════════════════════════════ */
+    function showLockedMessage(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        showTrackerToast('This job is now in the Tracker — manage it there', 'lock');
+    }
 
     /* ═══════════════════════════════════════════
        TRACK JOB CLICK → ADD TO TRACKER
