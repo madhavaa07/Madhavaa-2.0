@@ -801,8 +801,10 @@
     }
 
     function getFiltered() {
-        if (currentFilter === 'all') return applications;
-        return applications.filter(a => a.status === currentFilter);
+        // Exclude pending confirmations from main table — they show in the pending section
+        const confirmed = applications.filter(a => !a.pending_confirmation);
+        if (currentFilter === 'all') return confirmed;
+        return confirmed.filter(a => a.status === currentFilter);
     }
 
     /* ═══════════════════════════════════════════
@@ -813,9 +815,10 @@
         const empty = document.getElementById('emptyState');
         const filtered = getFiltered();
 
-        // KPI
-        const counts = { total: applications.length, applied: 0, rejected: 0, no_response: 0, ghosting: 0, not_applied: 0 };
-        applications.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
+        // KPI — count only confirmed entries (not pending)
+        const confirmed = applications.filter(a => !a.pending_confirmation);
+        const counts = { total: confirmed.length, applied: 0, rejected: 0, no_response: 0, ghosting: 0, not_applied: 0 };
+        confirmed.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
         document.getElementById('kpiTotal').textContent = counts.total;
         document.getElementById('kpiApplied').textContent = counts.applied;
         document.getElementById('kpiRejected').textContent = counts.rejected;
@@ -1103,7 +1106,7 @@
                     </div>
                 </div>
                 <!-- Custom status panel (hidden by default) -->
-                <div id="custom-${app.id}" style="display:none;" class="mt-3 pt-3" style="border-top:1px solid rgba(72,72,73,0.2);">
+                <div id="custom-${app.id}" style="display:none;border-top:1px solid rgba(72,72,73,0.2);" class="mt-3 pt-3">
                     <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
                         <div class="flex-shrink-0">
                             <div class="font-jetbrains text-xs text-outline mb-1">STATUS</div>
@@ -1142,7 +1145,10 @@
     function submitCustomStatus(id) {
         const statusEl = document.getElementById('customStatus-' + id);
         const noteEl = document.getElementById('customNote-' + id);
-        if (!statusEl || !noteEl) return;
+        if (!statusEl || !noteEl) {
+            showToast('Error: form fields not found', 'error');
+            return;
+        }
 
         const note = noteEl.value.trim();
         if (!note) {
@@ -1156,8 +1162,26 @@
     }
 
     function confirmApplication(id, status, note) {
-        const idx = applications.findIndex(a => a.id === id);
-        if (idx === -1) return;
+        // Always reload from localStorage to ensure we have fresh data
+        loadData();
+
+        let idx = applications.findIndex(a => a.id === id);
+
+        // Fallback: if not found in memory, try reading directly from localStorage
+        if (idx === -1) {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    applications = JSON.parse(raw);
+                    idx = applications.findIndex(a => a.id === id);
+                }
+            } catch(e) {}
+        }
+
+        if (idx === -1) {
+            showToast('Entry not found — try refreshing', 'error');
+            return;
+        }
 
         const statusLabels = { applied: 'Applied', not_applied: 'Not Applied', rejected: 'Rejected', no_response: 'No Response', ghosting: 'Ghosting' };
 
@@ -1175,6 +1199,7 @@
     }
 
     function dismissPending(id) {
+        loadData(); // refresh from storage
         applications = applications.filter(a => a.id !== id);
         saveData();
         render();
