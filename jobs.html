@@ -825,8 +825,14 @@
         if (!job) return;
 
         const TRACKER_KEY = 'msk_tracker_data';
+        const BACKUP_KEY = TRACKER_KEY + '_backup';
         let trackerData = [];
-        try { trackerData = JSON.parse(localStorage.getItem(TRACKER_KEY)) || []; } catch(e) { trackerData = []; }
+        try {
+            trackerData = JSON.parse(localStorage.getItem(TRACKER_KEY)) || [];
+        } catch(e) {
+            // Try backup if primary is corrupted
+            try { trackerData = JSON.parse(localStorage.getItem(BACKUP_KEY)) || []; } catch(e2) { trackerData = []; }
+        }
 
         // Check if already tracked by URL
         const applyUrl = job.job_apply_link || job.job_google_link || '';
@@ -852,7 +858,9 @@
         };
 
         trackerData.unshift(entry);
-        localStorage.setItem(TRACKER_KEY, JSON.stringify(trackerData));
+        const json = JSON.stringify(trackerData);
+        localStorage.setItem(TRACKER_KEY, json);
+        localStorage.setItem(BACKUP_KEY, json); // always backup
         showTrackerToast('Added to tracker — confirm in Tracker', 'assignment_add');
     }
 

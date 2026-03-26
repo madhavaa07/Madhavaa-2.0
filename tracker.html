@@ -555,19 +555,66 @@
     })();
 
     /* ═══════════════════════════════════════════
-       DATA MANAGEMENT
+       DATA MANAGEMENT (with backup & recovery)
     ═══════════════════════════════════════════ */
+    const BACKUP_KEY = STORAGE_KEY + '_backup';
+
     function loadData() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            applications = raw ? JSON.parse(raw) : [];
-        } catch(e) {
-            applications = [];
-        }
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    applications = parsed;
+                    return;
+                }
+            }
+        } catch(e) {}
+
+        // Primary failed or empty — try recovering from backup
+        try {
+            const backup = localStorage.getItem(BACKUP_KEY);
+            if (backup) {
+                const parsed = JSON.parse(backup);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    applications = parsed;
+                    // Restore primary from backup
+                    localStorage.setItem(STORAGE_KEY, backup);
+                    console.log('[TRACKER] Recovered ' + parsed.length + ' entries from backup');
+                    return;
+                }
+            }
+        } catch(e) {}
+
+        applications = [];
     }
 
-    function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    function saveData(userAction) {
+        const json = JSON.stringify(applications);
+
+        // Safety: never overwrite non-empty data with empty array UNLESS user explicitly deleted
+        if (applications.length === 0 && !userAction) {
+            try {
+                const existing = localStorage.getItem(STORAGE_KEY);
+                if (existing) {
+                    const parsed = JSON.parse(existing);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        // Don't overwrite — store backup and warn
+                        localStorage.setItem(BACKUP_KEY, existing);
+                        console.warn('[TRACKER] Prevented overwrite of ' + parsed.length + ' entries with empty data');
+                        return;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Save primary
+        localStorage.setItem(STORAGE_KEY, json);
+
+        // Always keep a backup of non-empty data
+        if (applications.length > 0) {
+            localStorage.setItem(BACKUP_KEY, json);
+        }
     }
 
     function generateId() {
@@ -676,7 +723,7 @@
     function deleteEntry(id) {
         if (!confirm('Remove this application entry?')) return;
         applications = applications.filter(a => a.id !== id);
-        saveData();
+        saveData(true); // user-initiated delete
         render();
         showToast('Entry removed', 'success');
     }
@@ -1201,7 +1248,7 @@
     function dismissPending(id) {
         loadData(); // refresh from storage
         applications = applications.filter(a => a.id !== id);
-        saveData();
+        saveData(true); // user-initiated delete
         render();
         renderPending();
         showToast('Entry removed', 'success');
