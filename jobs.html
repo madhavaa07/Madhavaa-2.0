@@ -280,6 +280,7 @@
                 <!-- Filter Buttons -->
                 <div class="flex gap-2 filters-row flex-wrap">
                     <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">ALL</button>
+                    <button class="filter-btn" data-filter="contract" onclick="setFilter('contract', this)">CONTRACT</button>
                     <button class="filter-btn" data-filter="cybersecurity" onclick="setFilter('cybersecurity', this)">CYBERSECURITY</button>
                     <button class="filter-btn" data-filter="grc" onclick="setFilter('grc', this)">GRC</button>
                     <button class="filter-btn" data-filter="cloud security" onclick="setFilter('cloud security', this)">CLOUD SEC</button>
@@ -349,6 +350,11 @@
     const JSEARCH_API_KEY = localStorage.getItem('jsearch_api_key') || '8ce24b5e5dmsh48b479319bb80dep1d2105jsn7b4331d90289';
     const REFRESH_INTERVAL = 5 * 60 * 60 * 1000; // 5 hours in ms
     const DEFAULT_QUERIES = [
+        'cybersecurity contractor USA',
+        'GRC contractor USA',
+        'cloud security contract USA',
+        'IAM contract engineer USA',
+        'IT security contractor USA',
         'cybersecurity analyst USA',
         'GRC analyst USA',
         'cloud security engineer USA',
@@ -508,8 +514,14 @@
             return (Date.now() - new Date(job.job_posted_at_datetime_utc).getTime()) <= TEN_DAYS;
         });
 
-        // Sort by date (newest first)
+        // Sort: contractors first, then fulltime — within each group, newest first
         allJobs.sort((a, b) => {
+            const aType = (a.job_employment_type || '').toUpperCase();
+            const bType = (b.job_employment_type || '').toUpperCase();
+            const aIsContract = aType.includes('CONTRACT') || aType.includes('CONTRACTOR');
+            const bIsContract = bType.includes('CONTRACT') || bType.includes('CONTRACTOR');
+            if (aIsContract && !bIsContract) return -1;
+            if (!aIsContract && bIsContract) return 1;
             const da = new Date(a.job_posted_at_datetime_utc || 0);
             const db = new Date(b.job_posted_at_datetime_utc || 0);
             return db - da;
@@ -556,7 +568,13 @@
         const trackerMap = getTrackerMap();
 
         let filtered = allJobs;
-        if (currentFilter !== 'all') {
+        if (currentFilter === 'contract') {
+            filtered = allJobs.filter(j => {
+                const empType = (j.job_employment_type || '').toUpperCase();
+                const title = (j.job_title || '').toLowerCase();
+                return empType.includes('CONTRACT') || empType.includes('CONTRACTOR') || title.includes('contract');
+            });
+        } else if (currentFilter !== 'all') {
             filtered = allJobs.filter(j => {
                 const text = (j.job_title + ' ' + j.job_description + ' ' + (j.job_highlights?.Qualifications?.join(' ') || '')).toLowerCase();
                 return text.includes(currentFilter.toLowerCase());
