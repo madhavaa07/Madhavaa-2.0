@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSK - Resume Marketer</title>
+    <title>MSK - Resume Marketer & AI Detector</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -106,6 +106,38 @@
         #authOverlay.hidden { display: none; }
 
         @media (max-width: 1023px) { .main-grid { grid-template-columns: 1fr !important; } }
+
+        /* Tab system */
+        .tab-bar { display: flex; gap: 0; border-bottom: 2px solid #484849; }
+        .tab-btn {
+            padding: 12px 24px; font-family: "JetBrains Mono", monospace; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 1px; color: #adaaab; cursor: pointer;
+            transition: all 0.2s ease; border: none; background: transparent;
+            border-bottom: 2px solid transparent; margin-bottom: -2px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { color: #9cff93; border-bottom-color: #9cff93; }
+        .tab-btn.active-ai { color: #c084fc; border-bottom-color: #c084fc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* AI Detector specific */
+        .ai-meter { height: 8px; background: #262627; width: 100%; overflow: hidden; }
+        .ai-meter-fill { height: 100%; transition: width 1s ease; }
+        .ai-signal {
+            background: #131314; border: 1px solid rgba(72,72,73,0.2);
+            padding: 12px 16px; transition: all 0.3s ease;
+        }
+        .ai-signal:hover { border-color: rgba(192,132,252,0.3); }
+        .highlight-ai {
+            background: rgba(192,132,252,0.15); border-bottom: 1px solid rgba(192,132,252,0.4);
+            padding: 0 2px;
+        }
+        .highlight-human {
+            background: rgba(156,255,147,0.1); border-bottom: 1px solid rgba(156,255,147,0.3);
+            padding: 0 2px;
+        }
     </style>
 </head>
 <body>
@@ -145,7 +177,22 @@
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Tab Bar -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('ats')">
+                    <span class="material-symbols-outlined" style="font-size:16px;">query_stats</span>
+                    ATS SCANNER
+                </button>
+                <button class="tab-btn" onclick="switchTab('ai')">
+                    <span class="material-symbols-outlined" style="font-size:16px;">psychology</span>
+                    AI DETECTOR
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB: ATS SCANNER -->
+        <div id="tabATS" class="tab-content active">
         <div class="flex-1">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
@@ -285,6 +332,130 @@
                 </div>
             </div>
         </div>
+        </div><!-- /tabATS -->
+
+        <!-- TAB: AI DETECTOR -->
+        <div id="tabAI" class="tab-content">
+        <div class="flex-1">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-grid">
+
+                    <!-- Left: Input -->
+                    <div class="space-y-4">
+                        <!-- Text Input Panel -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
+                                PASTE CONTENT
+                            </div>
+                            <div class="p-4">
+                                <textarea id="aiInputText" class="text-input" rows="12" placeholder="paste_text_to_analyze..."></textarea>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="font-jetbrains text-xs text-outline" id="aiWordCount">0 WORDS</span>
+                                    <button class="btn-secondary" onclick="clearAIInput()">CLEAR</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload Panel -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">upload_file</span>
+                                UPLOAD DOCUMENT
+                            </div>
+                            <div class="p-4">
+                                <div id="aiDropZone" class="drop-zone" onclick="document.getElementById('aiFileInput').click()" style="padding:24px;">
+                                    <span class="material-symbols-outlined text-outline-variant mb-2" style="font-size:28px;">cloud_upload</span>
+                                    <div class="font-jetbrains text-xs text-on-surface-variant mb-1">DROP PDF / DOCX HERE</div>
+                                    <div class="font-jetbrains text-xs text-outline">or click to browse</div>
+                                    <input type="file" id="aiFileInput" accept=".pdf,.docx" style="display:none" onchange="handleAIFileUpload(event)">
+                                </div>
+                                <span class="font-jetbrains text-xs text-outline mt-2 block" id="aiFileStatus"></span>
+                            </div>
+                        </div>
+
+                        <!-- Scan Button -->
+                        <button class="w-full flex items-center justify-center gap-2 py-4 font-space font-bold text-xs uppercase tracking-wider cursor-pointer transition-all" id="aiScanBtn" onclick="runAIDetection()" style="background:linear-gradient(135deg,#c084fc 0%,#a855f7 100%);color:#1a091f;border:none;letter-spacing:1px;">
+                            <span class="material-symbols-outlined" style="font-size:18px;">psychology</span>
+                            ANALYZE FOR AI CONTENT
+                        </button>
+                        <div class="font-jetbrains text-xs text-outline text-center" style="margin-top:-8px;">Minimum 50 words required for accurate analysis</div>
+                    </div>
+
+                    <!-- Right: Results -->
+                    <div id="aiResults" style="display:none;" class="space-y-4 fade-in">
+                        <!-- Overall Score -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">speed</span>
+                                AI PROBABILITY SCORE
+                            </div>
+                            <div class="p-6 flex items-center gap-8">
+                                <div class="score-ring">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" fill="none" stroke="#262627" stroke-width="8"/>
+                                        <circle cx="60" cy="60" r="52" fill="none" stroke="#c084fc" stroke-width="8" stroke-dasharray="327" stroke-dashoffset="327" id="aiScoreArc" stroke-linecap="square"/>
+                                    </svg>
+                                    <div class="score-text">
+                                        <span class="font-space text-3xl font-bold" id="aiScoreValue" style="color:#c084fc;">0</span>
+                                        <span class="font-jetbrains text-xs text-outline">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-space text-lg font-semibold" id="aiScoreLabel">—</div>
+                                    <div class="font-inter text-sm text-on-surface-variant mt-1" id="aiScoreSummary">Paste or upload content to analyze</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signal Breakdown -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">monitoring</span>
+                                SIGNAL BREAKDOWN
+                            </div>
+                            <div class="p-4 space-y-3" id="aiSignals">—</div>
+                        </div>
+
+                        <!-- Sentence Highlight -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">highlight</span>
+                                SENTENCE ANALYSIS
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <span class="flex items-center gap-1 font-jetbrains text-xs"><span class="inline-block w-3 h-3" style="background:rgba(192,132,252,0.3);border:1px solid rgba(192,132,252,0.6);"></span> Likely AI</span>
+                                    <span class="flex items-center gap-1 font-jetbrains text-xs"><span class="inline-block w-3 h-3" style="background:rgba(156,255,147,0.15);border:1px solid rgba(156,255,147,0.4);"></span> Likely Human</span>
+                                </div>
+                                <div id="aiSentenceMap" class="font-inter text-sm leading-relaxed text-on-surface-variant max-h-96 overflow-y-auto">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Tips -->
+                        <div class="panel">
+                            <div class="panel-header" style="color:#c084fc;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">tips_and_updates</span>
+                                FINDINGS
+                            </div>
+                            <div class="p-4">
+                                <div id="aiFindings" class="space-y-3 font-inter text-sm text-on-surface-variant">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder -->
+                    <div id="aiNoResults" class="flex items-center justify-center">
+                        <div class="text-center py-20">
+                            <span class="material-symbols-outlined mb-4" style="font-size:64px;color:#c084fc;opacity:0.4;">psychology</span>
+                            <div class="font-space text-lg text-on-surface-variant mb-2">Paste text or upload a document</div>
+                            <div class="font-jetbrains text-xs text-outline">Then hit ANALYZE to detect AI-generated content</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div><!-- /tabAI -->
 
         <!-- Footer -->
         <footer class="border-t border-outline-variant/20 bg-surface-container-low/30">
@@ -533,6 +704,327 @@
        UTILITIES
     ═══════════════════════════════════════════ */
     function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+    /* ═══════════════════════════════════════════
+       TAB SWITCHING
+    ═══════════════════════════════════════════ */
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active', 'active-ai'); });
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        if (tab === 'ats') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('tabATS').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active', 'active-ai');
+            document.getElementById('tabAI').classList.add('active');
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       AI DETECTOR — FILE HANDLING
+    ═══════════════════════════════════════════ */
+    (function() {
+        const dz = document.getElementById('aiDropZone');
+        if (!dz) return;
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+        dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleAIFile(e.dataTransfer.files[0]); });
+    })();
+
+    function handleAIFileUpload(e) { if (e.target.files[0]) handleAIFile(e.target.files[0]); }
+
+    async function handleAIFile(file) {
+        const status = document.getElementById('aiFileStatus');
+        status.textContent = 'PARSING...'; status.style.color = '#00bdfd';
+        try {
+            let text = '';
+            if (file.name.endsWith('.pdf')) {
+                const ab = await file.arrayBuffer();
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const pg = await pdf.getPage(i);
+                    const c = await pg.getTextContent();
+                    text += c.items.map(item => item.str).join(' ') + '\n';
+                }
+            } else if (file.name.endsWith('.docx')) {
+                const ab = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({ arrayBuffer: ab });
+                text = result.value;
+            } else {
+                status.textContent = 'UNSUPPORTED FORMAT'; status.style.color = '#ff6b6b'; return;
+            }
+            document.getElementById('aiInputText').value = text.trim();
+            updateAIWordCount();
+            status.textContent = `LOADED: ${file.name}`;
+            status.style.color = '#9cff93';
+        } catch(err) {
+            status.textContent = 'PARSE ERROR: ' + err.message; status.style.color = '#ff6b6b';
+        }
+    }
+
+    function clearAIInput() {
+        document.getElementById('aiInputText').value = '';
+        document.getElementById('aiWordCount').textContent = '0 WORDS';
+        document.getElementById('aiFileStatus').textContent = '';
+    }
+
+    function updateAIWordCount() {
+        const t = document.getElementById('aiInputText').value.trim();
+        const wc = t ? t.split(/\s+/).length : 0;
+        document.getElementById('aiWordCount').textContent = wc + ' WORDS';
+    }
+    document.getElementById('aiInputText')?.addEventListener('input', updateAIWordCount);
+
+    /* ═══════════════════════════════════════════
+       AI DETECTION ENGINE (Client-Side Heuristics)
+    ═══════════════════════════════════════════ */
+    function runAIDetection() {
+        const text = document.getElementById('aiInputText').value.trim();
+        if (!text) return alert('Please paste or upload content to analyze.');
+        const words = text.split(/\s+/);
+        if (words.length < 50) return alert('Please provide at least 50 words for accurate analysis.');
+
+        document.getElementById('aiResults').style.display = 'block';
+        document.getElementById('aiNoResults').style.display = 'none';
+
+        const sentences = splitSentences(text);
+        const signals = analyzeSignals(text, words, sentences);
+        const sentenceScores = scoreSentences(sentences);
+        const overallScore = computeOverallScore(signals);
+
+        renderAIResults(overallScore, signals, sentences, sentenceScores);
+    }
+
+    function splitSentences(text) {
+        // Split on sentence-ending punctuation followed by space/newline or end
+        return text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+    }
+
+    function analyzeSignals(text, words, sentences) {
+        const signals = {};
+
+        // 1. Sentence Length Uniformity
+        const sentLengths = sentences.map(s => s.split(/\s+/).length);
+        const avgLen = sentLengths.reduce((a,b) => a+b, 0) / sentLengths.length;
+        const variance = sentLengths.reduce((sum, l) => sum + Math.pow(l - avgLen, 2), 0) / sentLengths.length;
+        const stdDev = Math.sqrt(variance);
+        const cv = avgLen > 0 ? stdDev / avgLen : 0;
+        // Low coefficient of variation = uniform = AI-like
+        signals.sentenceUniformity = {
+            label: 'Sentence Length Uniformity',
+            desc: cv < 0.3 ? 'Very uniform sentence lengths — typical of AI' : cv < 0.5 ? 'Moderately uniform' : 'Natural variation in length',
+            score: cv < 0.25 ? 95 : cv < 0.35 ? 75 : cv < 0.5 ? 45 : cv < 0.65 ? 25 : 10,
+            raw: `CV: ${cv.toFixed(2)}, Avg: ${avgLen.toFixed(1)} words`
+        };
+
+        // 2. Vocabulary Diversity (Type-Token Ratio)
+        const lowerWords = words.map(w => w.toLowerCase().replace(/[^a-z']/g, '')).filter(w => w.length > 1);
+        const unique = new Set(lowerWords);
+        const ttr = lowerWords.length > 0 ? unique.size / lowerWords.length : 0;
+        // AI tends to use a narrower vocabulary relative to length
+        signals.vocabDiversity = {
+            label: 'Vocabulary Diversity',
+            desc: ttr < 0.35 ? 'Low diversity — repetitive vocabulary' : ttr < 0.5 ? 'Moderate diversity' : 'Rich, varied vocabulary',
+            score: ttr < 0.3 ? 85 : ttr < 0.4 ? 65 : ttr < 0.5 ? 40 : ttr < 0.6 ? 20 : 10,
+            raw: `TTR: ${ttr.toFixed(3)} (${unique.size} unique / ${lowerWords.length} total)`
+        };
+
+        // 3. Transition/Filler Overuse
+        const transitions = ['furthermore','moreover','additionally','consequently','nevertheless',
+            'in conclusion','overall','therefore','however','in addition','as a result',
+            'on the other hand','it is important to note','it is worth noting',
+            'in today\'s world','in the realm of','plays a crucial role',
+            'it is essential','navigating the','leveraging','delve','tapestry',
+            'multifaceted','holistic','paradigm','synergy','robust','streamline',
+            'comprehensive','innovative','cutting-edge','game-changer','landscape'];
+        const textLower = text.toLowerCase();
+        let transCount = 0;
+        const foundTransitions = [];
+        transitions.forEach(t => {
+            const regex = new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+            const matches = textLower.match(regex);
+            if (matches) { transCount += matches.length; foundTransitions.push(t); }
+        });
+        const transDensity = (transCount / sentences.length) * 100;
+        signals.transitionOveruse = {
+            label: 'AI Buzzword Density',
+            desc: transCount > 5 ? `High use of AI-typical phrases: "${foundTransitions.slice(0,3).join('", "')}"` : transCount > 2 ? 'Some AI-typical phrasing detected' : 'Low use of AI buzzwords',
+            score: transDensity > 30 ? 95 : transDensity > 15 ? 75 : transDensity > 8 ? 50 : transDensity > 3 ? 25 : 5,
+            raw: `${transCount} occurrences in ${sentences.length} sentences`
+        };
+
+        // 4. Paragraph Opening Repetition
+        const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+        const openers = paragraphs.map(p => {
+            const firstWords = p.trim().split(/\s+/).slice(0, 3).join(' ').toLowerCase();
+            return firstWords;
+        });
+        const openerSet = new Set(openers);
+        const openerRepeat = paragraphs.length > 1 ? 1 - (openerSet.size / openers.length) : 0;
+        signals.paragraphOpeners = {
+            label: 'Paragraph Opening Variety',
+            desc: openerRepeat > 0.4 ? 'Repetitive paragraph openings' : openerRepeat > 0.2 ? 'Some repetition in openings' : 'Good variety in openings',
+            score: openerRepeat > 0.5 ? 85 : openerRepeat > 0.3 ? 60 : openerRepeat > 0.15 ? 35 : 10,
+            raw: `${openerSet.size} unique / ${openers.length} paragraphs`
+        };
+
+        // 5. Avg Sentence Complexity (comma-per-sentence as proxy)
+        const commaCount = sentences.map(s => (s.match(/,/g) || []).length);
+        const avgComma = commaCount.reduce((a,b)=>a+b,0) / sentences.length;
+        // AI tends to produce consistently medium-length sentences with regular comma usage
+        const commaVariance = commaCount.reduce((sum, c) => sum + Math.pow(c - avgComma, 2), 0) / commaCount.length;
+        const commaCV = avgComma > 0 ? Math.sqrt(commaVariance) / avgComma : 0;
+        signals.punctuationPattern = {
+            label: 'Punctuation Regularity',
+            desc: commaCV < 0.5 ? 'Very regular comma patterns — mechanical feel' : 'Natural punctuation variation',
+            score: commaCV < 0.3 ? 80 : commaCV < 0.5 ? 55 : commaCV < 0.8 ? 30 : 10,
+            raw: `Avg commas/sentence: ${avgComma.toFixed(1)}, CV: ${commaCV.toFixed(2)}`
+        };
+
+        // 6. Passive Voice Density
+        const passivePatterns = /\b(is|are|was|were|been|being|be)\s+(being\s+)?\w+ed\b/gi;
+        const passiveMatches = text.match(passivePatterns) || [];
+        const passivePct = (passiveMatches.length / sentences.length) * 100;
+        signals.passiveVoice = {
+            label: 'Passive Voice Usage',
+            desc: passivePct > 30 ? 'Heavy passive voice — common in AI output' : passivePct > 15 ? 'Moderate passive voice' : 'Active voice dominant',
+            score: passivePct > 40 ? 80 : passivePct > 25 ? 60 : passivePct > 15 ? 35 : passivePct > 8 ? 20 : 5,
+            raw: `${passiveMatches.length} passive constructions (${passivePct.toFixed(0)}% of sentences)`
+        };
+
+        // 7. Hedging Language
+        const hedges = ['may','might','could','possibly','potentially','perhaps','generally',
+            'typically','tends to','it seems','it appears','in some cases','to some extent',
+            'it is possible','arguably'];
+        let hedgeCount = 0;
+        hedges.forEach(h => {
+            const r = new RegExp('\\b' + h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+            const m = textLower.match(r);
+            if (m) hedgeCount += m.length;
+        });
+        const hedgeDensity = (hedgeCount / words.length) * 100;
+        signals.hedging = {
+            label: 'Hedging Language',
+            desc: hedgeDensity > 3 ? 'Excessive hedging — AI tends to over-qualify statements' : hedgeDensity > 1.5 ? 'Moderate hedging' : 'Confident, direct language',
+            score: hedgeDensity > 4 ? 80 : hedgeDensity > 2.5 ? 60 : hedgeDensity > 1.5 ? 35 : hedgeDensity > 0.5 ? 15 : 5,
+            raw: `${hedgeCount} hedges in ${words.length} words (${hedgeDensity.toFixed(1)}%)`
+        };
+
+        return signals;
+    }
+
+    function scoreSentences(sentences) {
+        return sentences.map(s => {
+            let score = 0;
+            let factors = 0;
+            const words = s.split(/\s+/);
+            const sLower = s.toLowerCase();
+
+            // Length: very uniform mid-range sentences = AI
+            if (words.length >= 15 && words.length <= 25) { score += 60; } else if (words.length < 8 || words.length > 40) { score += 15; } else { score += 40; }
+            factors++;
+
+            // AI buzzwords
+            const aiWords = ['furthermore','moreover','additionally','consequently','nevertheless',
+                'it is important','it is worth','in today\'s','crucial','essential',
+                'comprehensive','innovative','robust','leveraging','delve','multifaceted',
+                'holistic','paradigm','streamline','cutting-edge','landscape','navigate'];
+            if (aiWords.some(w => sLower.includes(w))) { score += 85; factors++; }
+
+            // Starts with common AI patterns
+            if (/^(In conclusion|Overall|Furthermore|Moreover|Additionally|However,|It is|This is|One of the)/i.test(s)) { score += 70; factors++; }
+
+            // Has specific/unique details (numbers, names, places) = more human
+            if (/\d{4}|\$[\d,]+|\d+%|[A-Z][a-z]+ [A-Z][a-z]+/.test(s)) { score -= 20; factors++; }
+
+            // Contractions = more human
+            if (/\b(I'm|don't|can't|won't|didn't|isn't|aren't|wasn't|we're|they're|it's|I've|I'd)\b/.test(s)) { score -= 25; factors++; }
+
+            // First person casual = human
+            if (/\b(I think|I believe|I feel|honestly|frankly|basically|literally)\b/i.test(s)) { score -= 30; factors++; }
+
+            return Math.max(0, Math.min(100, factors > 0 ? score / factors : 30));
+        });
+    }
+
+    function computeOverallScore(signals) {
+        const weights = {
+            sentenceUniformity: 0.2,
+            vocabDiversity: 0.15,
+            transitionOveruse: 0.25,
+            paragraphOpeners: 0.1,
+            punctuationPattern: 0.1,
+            passiveVoice: 0.1,
+            hedging: 0.1
+        };
+        let total = 0, wSum = 0;
+        Object.keys(signals).forEach(k => {
+            const w = weights[k] || 0.1;
+            total += signals[k].score * w;
+            wSum += w;
+        });
+        return Math.round(total / wSum);
+    }
+
+    function renderAIResults(score, signals, sentences, sentenceScores) {
+        // Score ring
+        const arc = document.getElementById('aiScoreArc');
+        arc.style.transition = 'stroke-dashoffset 1s ease';
+        arc.style.strokeDashoffset = 327 - (327 * score / 100);
+        arc.style.stroke = score >= 70 ? '#ff6b6b' : score >= 40 ? '#ffb74d' : '#9cff93';
+
+        document.getElementById('aiScoreValue').textContent = score;
+        document.getElementById('aiScoreValue').style.color = score >= 70 ? '#ff6b6b' : score >= 40 ? '#ffb74d' : '#9cff93';
+
+        const label = score >= 80 ? 'Highly Likely AI' : score >= 60 ? 'Likely AI-Generated' : score >= 40 ? 'Mixed / Uncertain' : score >= 20 ? 'Likely Human-Written' : 'Highly Likely Human';
+        document.getElementById('aiScoreLabel').textContent = label;
+        document.getElementById('aiScoreLabel').style.color = score >= 70 ? '#ff6b6b' : score >= 40 ? '#ffb74d' : '#9cff93';
+        document.getElementById('aiScoreSummary').textContent = `Based on ${Object.keys(signals).length} heuristic signals analyzed client-side`;
+
+        // Signals
+        const sigHTML = Object.values(signals).map(sig => {
+            const color = sig.score >= 70 ? '#ff6b6b' : sig.score >= 40 ? '#ffb74d' : '#9cff93';
+            return `
+                <div class="ai-signal">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-space text-sm font-semibold">${sig.label}</span>
+                        <span class="font-jetbrains text-xs" style="color:${color};">${sig.score}%</span>
+                    </div>
+                    <div class="ai-meter"><div class="ai-meter-fill" style="width:${sig.score}%;background:${color};"></div></div>
+                    <div class="font-inter text-xs text-on-surface-variant mt-2">${sig.desc}</div>
+                    <div class="font-jetbrains text-xs text-outline mt-1">${sig.raw}</div>
+                </div>`;
+        }).join('');
+        document.getElementById('aiSignals').innerHTML = sigHTML;
+
+        // Sentence map
+        const mapHTML = sentences.map((s, i) => {
+            const sc = sentenceScores[i] || 0;
+            const cls = sc >= 55 ? 'highlight-ai' : sc <= 30 ? 'highlight-human' : '';
+            return `<span class="${cls}" title="AI confidence: ${Math.round(sc)}%">${escapeHtml(s)} </span>`;
+        }).join('');
+        document.getElementById('aiSentenceMap').innerHTML = mapHTML;
+
+        // Findings
+        const findings = [];
+        const sigArr = Object.values(signals).sort((a,b) => b.score - a.score);
+        if (score >= 60) {
+            findings.push('This text exhibits multiple characteristics commonly associated with AI-generated content.');
+            sigArr.slice(0, 3).forEach(s => {
+                if (s.score >= 50) findings.push(`<strong style="color:#c084fc;">${s.label}:</strong> ${s.desc}`);
+            });
+        } else if (score >= 35) {
+            findings.push('This text shows a mix of AI-like and human-like characteristics. It may have been AI-generated and then edited, or written by a human with a formal style.');
+        } else {
+            findings.push('This text appears to be primarily human-written, showing natural variation in sentence structure and vocabulary.');
+        }
+        findings.push('<span class="text-outline" style="font-size:11px;">Note: This is a heuristic analysis only. Client-side detection cannot match dedicated AI classifiers. Use as a screening tool, not a definitive judgment.</span>');
+
+        document.getElementById('aiFindings').innerHTML = findings.map(f =>
+            `<div class="flex gap-2"><span class="material-symbols-outlined flex-shrink-0" style="font-size:16px;margin-top:2px;color:#c084fc;">arrow_right</span><span>${f}</span></div>`
+        ).join('');
+    }
 
     /* ═══════════════════════════════════════════
        TIMEZONE
