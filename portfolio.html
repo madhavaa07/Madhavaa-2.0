@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madhava Sai Kolluri - Sr. Information Security Analyst</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <style>
+        /* Tailwind Custom Config */
+        :root {
+            --color-surface-base: #0e0e0f;
+            --color-surface-container-low: #131314;
+            --color-surface-container-mid: #1a191b;
+            --color-surface-container-high: #262627;
+            --color-primary: #9cff93;
+            --color-primary-dark: #00fc40;
+            --color-secondary: #00bdfd;
+            --color-tertiary: #8af2ff;
+            --color-outline-variant: #484849;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b0b0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-surface-base);
+            color: var(--color-text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Grid Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(0deg, rgba(72, 72, 73, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(72, 72, 73, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Vertical Guide Lines */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, transparent calc(20% - 1px), rgba(72, 72, 73, 0.03) calc(20% - 1px), rgba(72, 72, 73, 0.03) 20%, transparent 20%),
+                linear-gradient(90deg, transparent calc(80% - 1px), rgba(72, 72, 73, 0.03) calc(80% - 1px), rgba(72, 72, 73, 0.03) 80%, transparent 80%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Section Dividers — illuminate on hover */
+        .section-divider {
+            position: relative;
+            width: 100%;
+            height: 1px;
+            z-index: 2;
+            cursor: crosshair;
+        }
+        .section-divider .divider-line {
+            position: absolute;
+            inset: 0;
+            background: var(--color-outline-variant);
+            opacity: 0.2;
+            transition: opacity 0.5s ease;
+        }
+        .section-divider .divider-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0%;
+            height: 3px;
+            background: radial-gradient(ellipse at center, var(--color-primary), rgba(156,255,147,0.4) 40%, transparent 70%);
+            box-shadow: 0 0 20px rgba(156,255,147,0.5), 0 0 60px rgba(156,255,147,0.2);
+            opacity: 0;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .section-divider .divider-flare {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0px;
+            height: 40px;
+            background: radial-gradient(ellipse at center, rgba(156,255,147,0.12), transparent 70%);
+            opacity: 0;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .section-divider:hover .divider-line {
+            opacity: 0.5;
+        }
+        .section-divider:hover .divider-glow {
+            width: 100%;
+            opacity: 1;
+        }
+        .section-divider:hover .divider-flare {
+            width: 60%;
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Typography Classes */
+        .space-grotesk {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        .terminal-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Glassmorphism */
+        .glass-bg {
+            background: rgba(19, 19, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(72, 72, 73, 0.15);
+        }
+
+        /* Surface Containers */
+        .surface-container-low {
+            background-color: var(--color-surface-container-low);
+        }
+
+        .surface-container-mid {
+            background-color: var(--color-surface-container-mid);
+        }
+
+        .surface-container-high {
+            background-color: var(--color-surface-container-high);
+        }
+
+        /* Glow Effects */
+        .glow-primary {
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.2);
+        }
+
+        .glow-primary:hover {
+            box-shadow: 0 0 30px rgba(156, 255, 147, 0.35);
+        }
+
+        /* Ghost Borders */
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.15);
+        }
+
+        /* Corner Accent Squares */
+        .corner-accent {
+            position: relative;
+        }
+
+        .corner-accent::before,
+        .corner-accent::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-primary);
+        }
+
+        .corner-accent::before {
+            top: -6px;
+            left: -6px;
+        }
+
+        .corner-accent::after {
+            bottom: -6px;
+            right: -6px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: #000;
+            border-radius: 0;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+            border-radius: 0;
+        }
+
+        .btn-ghost:hover {
+            background-color: rgba(156, 255, 147, 0.1);
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.2);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: rgba(156, 255, 147, 0.1);
+            border: 1px solid rgba(156, 255, 147, 0.3);
+            border-radius: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            margin-bottom: 24px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Terminal Cursor Animation */
+        .terminal-cursor::after {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background-color: var(--color-secondary);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        /* Text Scramble Effect */
+        .scramble-text {
+            display: inline-block;
+            min-height: 1em;
+        }
+
+        .scramble-char {
+            display: inline-block;
+            position: relative;
+            opacity: 0;
+            animation: scramble-in 0.8s ease forwards;
+        }
+
+        @keyframes scramble-in {
+            0% {
+                opacity: 0;
+                transform: rotateY(90deg);
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: rotateY(0deg);
+            }
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--color-outline-variant);
+            transform: translateX(-50%);
+        }
+
+        /* The single scroll-synced square — NO CSS transition, JS handles smoothing */
+        .timeline-tracker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background-color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+            transform: translateX(-50%);
+            z-index: 10;
+            will-change: top;
+            box-shadow: 0 0 14px rgba(156, 255, 147, 0.5), 0 0 36px rgba(156, 255, 147, 0.12);
+        }
+
+        /* Glow trail on the line behind the tracker */
+        .timeline-glow {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 0;
+            background: linear-gradient(to bottom, rgba(156, 255, 147, 0.0) 0%, var(--color-primary) 100%);
+            transform: translateX(-50%);
+            z-index: 5;
+            will-change: height;
+        }
+
+        .timeline-item {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-left: 0;
+            margin-right: 52%;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 52%;
+            margin-right: 0;
+            text-align: left;
+        }
+
+        /* Hide per-item dots — single tracker replaces them */
+        .timeline-dot {
+            display: none;
+        }
+
+        .timeline-content {
+            padding: 20px;
+            background-color: var(--color-surface-container-high);
+            border: 1px solid rgba(72, 72, 73, 0.15);
+            transition: opacity 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, transform 0.5s ease;
+            opacity: 0.35;
+            transform: scale(0.97);
+        }
+
+        .timeline-content.tl-active {
+            opacity: 1;
+            transform: scale(1);
+            background-color: var(--color-surface-container-mid);
+            border-color: rgba(156, 255, 147, 0.25);
+            box-shadow: 0 0 24px rgba(156, 255, 147, 0.12);
+        }
+
+        .timeline-content:hover {
+            opacity: 1;
+            transform: scale(1);
+            background-color: var(--color-surface-container-mid);
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.15);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: rgba(0, 189, 253, 0.1);
+            border: 1px solid rgba(0, 189, 253, 0.3);
+            color: var(--color-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            border-radius: 0;
+            margin-right: 8px;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background-color: rgba(0, 189, 253, 0.2);
+            border-color: rgba(0, 189, 253, 0.5);
+            box-shadow: 0 0 10px rgba(0, 189, 253, 0.2);
+        }
+
+        /* ═══ BENTO PROJECT GRID ═══ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto;
+            gap: 6px;
+        }
+
+        /* Bento card slots — desktop */
+        .bento-card:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 3; }   /* tall left */
+        .bento-card:nth-child(2) { grid-column: 2 / 4; grid-row: 1 / 2; }   /* wide top-center */
+        .bento-card:nth-child(3) { grid-column: 4 / 5; grid-row: 1 / 3; }   /* tall right */
+        .bento-card:nth-child(4) { grid-column: 2 / 3; grid-row: 2 / 3; }   /* small center-left */
+        .bento-card:nth-child(5) { grid-column: 3 / 4; grid-row: 2 / 3; }   /* small center-right */
+        .bento-card:nth-child(6) { grid-column: 1 / 3; grid-row: 3 / 4; }   /* wide bottom-left */
+
+        .bento-card {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--color-surface-container-high);
+            border: 1px solid rgba(72, 72, 73, 0.12);
+            min-height: 200px;
+            cursor: pointer;
+            /* Scroll reveal initial state */
+            opacity: 0;
+            transform: translateY(40px) scale(0.96);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.4s ease,
+                        box-shadow 0.4s ease;
+        }
+
+        .bento-card.revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Staggered reveal delays */
+        .bento-card:nth-child(1) { transition-delay: 0s; }
+        .bento-card:nth-child(2) { transition-delay: 0.08s; }
+        .bento-card:nth-child(3) { transition-delay: 0.16s; }
+        .bento-card:nth-child(4) { transition-delay: 0.24s; }
+        .bento-card:nth-child(5) { transition-delay: 0.32s; }
+        .bento-card:nth-child(6) { transition-delay: 0.4s; }
+
+        /* Background image layer */
+        .bento-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) brightness(0.35);
+            transition: filter 0.6s ease, transform 0.6s ease;
+        }
+
+        .bento-card:hover .bento-bg {
+            filter: grayscale(0%) brightness(0.3);
+            transform: scale(1.08);
+        }
+
+        /* Scanline overlay */
+        .bento-scanline {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.06) 2px,
+                rgba(0,0,0,0.06) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Green accent line top */
+        .bento-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+            z-index: 3;
+            transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .bento-card:hover .bento-accent {
+            width: 100%;
+        }
+
+        /* Content layer */
+        .bento-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+            padding: 24px;
+        }
+
+        /* Project number */
+        .bento-index {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            opacity: 0.5;
+            letter-spacing: 0.1em;
+            z-index: 2;
+            transition: opacity 0.3s ease;
+        }
+
+        .bento-card:hover .bento-index {
+            opacity: 1;
+        }
+
+        /* Icon */
+        .bento-icon {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            z-index: 2;
+            color: var(--color-primary);
+            opacity: 0.4;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .bento-card:hover .bento-icon {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .bento-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .bento-card:hover .bento-title {
+            color: var(--color-primary);
+        }
+
+        .bento-desc {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, margin 0.4s ease;
+            margin-bottom: 0;
+        }
+
+        .bento-card:hover .bento-desc {
+            max-height: 120px;
+            opacity: 1;
+            margin-bottom: 12px;
+        }
+
+        .bento-tags {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .bento-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: rgba(0, 189, 253, 0.08);
+            border: 1px solid rgba(0, 189, 253, 0.2);
+            color: var(--color-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            transition: background-color 0.3s ease;
+        }
+
+        .bento-card:hover .bento-tag {
+            background-color: rgba(0, 189, 253, 0.15);
+        }
+
+        /* Stat chip inside card */
+        .bento-stat {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+            z-index: 2;
+        }
+
+        .bento-card:hover .bento-stat {
+            opacity: 0.7;
+            transform: translateY(0);
+        }
+
+        /* Hover glow */
+        .bento-card:hover {
+            border-color: rgba(156, 255, 147, 0.25);
+            box-shadow: 0 0 30px rgba(156, 255, 147, 0.1), inset 0 0 60px rgba(156, 255, 147, 0.03);
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .bento-card:nth-child(1) { grid-column: 1 / 2; grid-row: auto; }
+            .bento-card:nth-child(2) { grid-column: 2 / 3; grid-row: auto; }
+            .bento-card:nth-child(3) { grid-column: 1 / 2; grid-row: auto; }
+            .bento-card:nth-child(4) { grid-column: 2 / 3; grid-row: auto; }
+            .bento-card:nth-child(5) { grid-column: 1 / 2; grid-row: auto; }
+            .bento-card:nth-child(6) { grid-column: 2 / 3; grid-row: auto; }
+            .bento-card { min-height: 220px; }
+        }
+
+        @media (max-width: 640px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+            .bento-card:nth-child(n) { grid-column: auto; grid-row: auto; }
+            .bento-card { min-height: 200px; }
+            .bento-desc { max-height: 80px !important; opacity: 1 !important; margin-bottom: 10px !important; }
+        }
+
+        /* Cert Card */
+        .cert-card {
+            padding: 20px;
+            background-color: var(--color-surface-container-high);
+            border: 1px solid rgba(72, 72, 73, 0.15);
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+
+        .cert-card:hover {
+            background-color: var(--color-surface-container-mid);
+            border-color: rgba(156, 255, 147, 0.3);
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.15);
+        }
+
+        /* Form Inputs */
+        .form-input {
+            width: 100%;
+            padding: 12px 0;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(72, 72, 73, 0.3);
+            color: var(--color-text-primary);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        .form-input:focus {
+            border-bottom-color: var(--color-primary);
+            box-shadow: 0 1px 0 var(--color-primary);
+        }
+
+        /* Navigation */
+        .nav-link {
+            position: relative;
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--color-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(72, 72, 73, 0.3);
+            border-radius: 0;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+            border-radius: 0;
+            transition: width 0.6s ease;
+        }
+
+        /* Profile Image */
+        .profile-image {
+            border: 1px solid rgba(72, 72, 73, 0.3);
+            border-radius: 0;
+        }
+
+        /* Sidebar Navigation Icon */
+        .sidebar-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 0;
+            width: 100%;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            transition: all 0.3s ease;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .sidebar-icon.active {
+            color: var(--color-primary);
+        }
+
+        .sidebar-icon.active::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 70%;
+            background: var(--color-primary);
+            box-shadow: 0 0 8px rgba(156, 255, 147, 0.4);
+        }
+
+        .sidebar-icon:hover {
+            color: var(--color-primary);
+        }
+
+        .sidebar-icon .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* FAB Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            background-color: var(--color-primary);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(156, 255, 147, 0.3);
+        }
+
+        .fab:hover {
+            box-shadow: 0 8px 24px rgba(156, 255, 147, 0.4);
+            transform: translateY(-4px);
+        }
+
+        .fab svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-tracker {
+                left: 20px;
+            }
+
+            .timeline-glow {
+                left: 20px;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                margin-left: 50px;
+                margin-right: 0;
+                text-align: left;
+            }
+
+            .sidebar {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Skill Card Grid */
+        .skill-card {
+            padding: 24px;
+            background-color: var(--color-surface-container-high);
+            border: 1px solid rgba(72, 72, 73, 0.15);
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+
+        .skill-card .flex-wrap {
+            flex-wrap: nowrap !important;
+            overflow: hidden;
+        }
+
+        .skill-card:hover {
+            background-color: var(--color-surface-container-mid);
+            border-color: rgba(156, 255, 147, 0.3);
+            box-shadow: 0 0 25px rgba(156, 255, 147, 0.2);
+        }
+
+        .skill-card .material-symbols-outlined {
+            font-size: 32px;
+            color: var(--color-primary);
+            margin-bottom: 12px;
+        }
+        /* ===== TERMINAL PRELOADER ===== */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0a0a0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'JetBrains Mono', monospace;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .preloader-terminal {
+            width: 520px;
+            max-width: 90vw;
+            background: #0e0e0f;
+            border: 1px solid #484849;
+            overflow: hidden;
+        }
+        .preloader-titlebar {
+            background: #131314;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #484849;
+        }
+        .preloader-dot {
+            width: 10px;
+            height: 10px;
+            background: #484849;
+        }
+        .preloader-dot.active { background: #9cff93; }
+        .preloader-titlebar span {
+            font-size: 10px;
+            color: #767576;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-left: auto;
+        }
+        .preloader-body {
+            padding: 20px;
+            min-height: 220px;
+        }
+        .preloader-line {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            line-height: 1.8;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .preloader-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .preloader-line .prompt { color: #9cff93; white-space: nowrap; }
+        .preloader-line .cmd { color: #adaaab; }
+        .preloader-line .status-ok { color: #9cff93; }
+        .preloader-line .status-load { color: #00bdfd; }
+        .preloader-line .status-warn { color: #8af2ff; }
+
+        .preloader-ascii {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.3;
+            color: #9cff93;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            text-shadow: 0 0 20px rgba(156, 255, 147, 0.4);
+        }
+        .preloader-ascii.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .preloader-progress {
+            margin-top: 16px;
+            height: 2px;
+            background: #262627;
+            overflow: hidden;
+        }
+        .preloader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #9cff93, #00fc40);
+            transition: width 0.3s ease;
+        }
+        @keyframes cursor-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .preloader-cursor {
+            display: inline-block;
+            width: 7px;
+            height: 14px;
+            background: #9cff93;
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: cursor-blink 0.8s step-end infinite;
+        }
+        /* CV Download Modal */
+        .cv-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .cv-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cv-modal {
+            background: var(--color-surface-container);
+            border: 1px solid rgba(156, 255, 147, 0.2);
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cv-modal-overlay.active .cv-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .cv-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--color-on-surface-variant);
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .cv-modal-close:hover {
+            color: var(--color-primary);
+        }
+
+        .cv-modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-on-surface);
+            margin-bottom: 8px;
+        }
+
+        .cv-modal-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+        }
+
+        .cv-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-outline-variant);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 12px;
+        }
+
+        .cv-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .cv-option:hover {
+            border-color: var(--color-primary);
+            background: rgba(156, 255, 147, 0.05);
+            box-shadow: 0 0 20px rgba(156, 255, 147, 0.1);
+        }
+
+        .cv-option-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--color-outline-variant);
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: 1px;
+        }
+
+        .cv-option:hover .cv-option-icon {
+            border-color: var(--color-primary);
+            background: rgba(156, 255, 147, 0.1);
+        }
+
+        .cv-option-info {
+            flex: 1;
+        }
+
+        .cv-option-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--color-on-surface);
+            margin-bottom: 2px;
+        }
+
+        .cv-option-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--color-on-surface-variant);
+        }
+
+        .cv-option-arrow {
+            color: var(--color-on-surface-variant);
+            font-size: 1.1rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .cv-option:hover .cv-option-arrow {
+            color: var(--color-primary);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== TERMINAL PRELOADER ===== -->
+    <div id="preloader">
+        <div class="preloader-terminal">
+            <div class="preloader-titlebar">
+                <div class="preloader-dot active"></div>
+                <div class="preloader-dot"></div>
+                <div class="preloader-dot"></div>
+                <span>msk_terminal v2.4</span>
+            </div>
+            <div class="preloader-body" id="preloaderBody">
+                <div class="preloader-line" data-delay="100">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">initializing system protocol...<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-line" data-delay="500">
+                    <span class="prompt">[SYS]</span>
+                    <span class="cmd">loading security modules</span>
+                    <span class="status-ok">[OK]</span>
+                </div>
+                <div class="preloader-line" data-delay="900">
+                    <span class="prompt">[NET]</span>
+                    <span class="cmd">establishing encrypted tunnel</span>
+                    <span class="status-load">[ACTIVE]</span>
+                </div>
+                <div class="preloader-line" data-delay="1300">
+                    <span class="prompt">[AUTH]</span>
+                    <span class="cmd">verifying credentials</span>
+                    <span class="status-ok">[GRANTED]</span>
+                </div>
+                <div class="preloader-line" data-delay="1700">
+                    <span class="prompt">[BOOT]</span>
+                    <span class="cmd">mounting interface components</span>
+                    <span class="status-warn">[READY]</span>
+                </div>
+                <div class="preloader-line" data-delay="2100">
+                    <span class="prompt">root@msk ~$</span>
+                    <span class="cmd">launch --portfolio<span class="preloader-cursor"></span></span>
+                </div>
+                <div class="preloader-ascii" id="preloaderAscii">
+<pre>
+ ███╗   ███╗ ███████╗ ██╗  ██╗
+ ████╗ ████║ ██╔════╝ ██║ ██╔╝
+ ██╔████╔██║ ███████╗ █████╔╝
+ ██║╚██╔╝██║ ╚════██║ ██╔═██╗
+ ██║ ╚═╝ ██║ ███████║ ██║  ██╗
+ ╚═╝     ╚═╝ ╚══════╝ ╚═╝  ╚═╝
+</pre>
+                </div>
+                <div class="preloader-progress">
+                    <div class="preloader-progress-bar" id="preloaderBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const lines = document.querySelectorAll('#preloaderBody .preloader-line');
+        const ascii = document.getElementById('preloaderAscii');
+        const bar = document.getElementById('preloaderBar');
+        const preloader = document.getElementById('preloader');
+        const totalDuration = 3200;
+
+        lines.forEach(line => {
+            const delay = parseInt(line.getAttribute('data-delay'));
+            setTimeout(() => {
+                line.classList.add('visible');
+                bar.style.width = Math.min((delay / totalDuration) * 100, 85) + '%';
+            }, delay);
+        });
+
+        setTimeout(() => {
+            ascii.classList.add('visible');
+            bar.style.width = '100%';
+        }, 2500);
+
+        setTimeout(() => {
+            preloader.classList.add('fade-out');
+        }, 3200);
+
+        setTimeout(() => {
+            preloader.style.display = 'none';
+        }, 3800);
+    })();
+    </script>
+
+    <div class="main-content">
+        <!-- Navigation Bar -->
+        <nav class="glass-bg fixed top-0 left-0 right-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="space-grotesk text-2xl text-[var(--color-primary)]">MSK.</div>
+
+                <div class="hidden md:flex gap-8 items-center">
+                    <a href="#experience" class="nav-link">Experience</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#skills" class="nav-link">Skills</a>
+                    <a href="#projects" class="nav-link">Projects</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </div>
+
+                <div class="flex gap-4 items-center">
+                    <button class="p-2 hover:text-[var(--color-primary)] transition">
+                        <span class="material-symbols-outlined text-xl">dark_mode</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="sidebar hidden lg:flex fixed left-0 top-0 w-20 h-screen surface-container-low flex-col items-center justify-center gap-4 pt-20 z-40">
+            <a href="#experience" class="sidebar-icon active" data-section="experience">
+                <span class="material-symbols-outlined">work_history</span>
+                <span>Exp</span>
+            </a>
+            <a href="#about" class="sidebar-icon" data-section="about">
+                <span class="material-symbols-outlined">person</span>
+                <span>About</span>
+            </a>
+            <a href="#skills" class="sidebar-icon" data-section="skills">
+                <span class="material-symbols-outlined">terminal</span>
+                <span>Skills</span>
+            </a>
+            <a href="#projects" class="sidebar-icon" data-section="projects">
+                <span class="material-symbols-outlined">folder_code</span>
+                <span>Projects</span>
+            </a>
+            <a href="blog.html" class="sidebar-icon" data-section="blog">
+                <span class="material-symbols-outlined">article</span>
+                <span>Blog</span>
+            </a>
+            <a href="#contact" class="sidebar-icon" data-section="contact">
+                <span class="material-symbols-outlined">send</span>
+                <span>Contact</span>
+            </a>
+        </aside>
+
+        <!-- Hero + Personnel File // Core Drive (merged) -->
+        <section id="about" class="pt-32 pb-20 px-6 lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <!-- Top row: intro + image -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                    <!-- Left Content -->
+                    <div>
+                        <div class="status-badge">
+                            <div class="pulse-dot"></div>
+                            <span>Available for Opportunities</span>
+                        </div>
+
+                        <h1 class="space-grotesk text-7xl lg:text-8xl leading-tight mb-4 text-white">
+                            <span class="scramble-text" id="heroTitle">
+                                M<span class="scramble-char" style="animation-delay: 0.05s">S</span><span class="scramble-char" style="animation-delay: 0.1s">K</span><span class="scramble-char" style="animation-delay: 0.15s">.</span>
+                            </span>
+                        </h1>
+
+                        <p class="terminal-text text-xl text-[var(--color-secondary)] mb-4">
+                            Sr. Information Security Analyst | Cybersecurity GRC<span class="terminal-cursor"></span>
+                        </p>
+
+                        <h2 class="space-grotesk text-2xl md:text-3xl mb-6 text-[var(--color-text-secondary)]">
+                            Personnel File // <span class="italic text-white">Core Drive</span>
+                        </h2>
+
+                        <p class="text-[var(--color-text-secondary)] text-lg leading-relaxed mb-4 max-w-lg">
+                            I'm Madhava Sai Kolluri — a Sr. Information Security Analyst with 9+ years of experience that started in data operations and grew into full-scale cybersecurity governance, risk management, and cloud security.
+                        </p>
+
+                        <p class="text-[var(--color-text-secondary)] text-base leading-relaxed mb-6 max-w-lg">
+                            I've built SSPs from scratch, led risk assessments that uncovered real control deficiencies, and driven POA&M remediation that consistently closed findings ahead of schedule. Whether it's writing security controls, coordinating with engineering, or sitting across from auditors — I focus on delivering documentation and governance outcomes that actually hold up under scrutiny.
+                        </p>
+
+                        <div class="flex flex-wrap gap-3 mb-8">
+                            <span class="tag">NIST SP 800-53</span>
+                            <span class="tag">RMF</span>
+                            <span class="tag">Cloud Security</span>
+                            <span class="tag">IAM / RBAC</span>
+                            <span class="tag">RSA Archer</span>
+                            <span class="tag">GRC</span>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">
+                                Get in Touch
+                            </button>
+                            <button class="btn btn-ghost" onclick="document.getElementById('cvModal').classList.add('active')">
+                                Download CV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Content: Profile Image -->
+                    <div class="relative">
+                        <div class="relative inline-block w-full max-w-md corner-accent">
+                            <img
+                                src="https://picsum.photos/400/400?grayscale&random=1"
+                                alt="Madhavaa"
+                                class="w-full profile-image"
+                            >
+                        </div>
+
+                        <!-- Stats Overlay -->
+                        <div class="absolute bottom-6 left-6 right-6 grid grid-cols-3 gap-3">
+                            <div class="surface-container-low p-4 border border-[rgba(72,72,73,0.15)]">
+                                <div class="terminal-text text-[var(--color-primary)] text-xl">9+</div>
+                                <div class="terminal-text text-xs text-[var(--color-text-secondary)]">Years Exp</div>
+                            </div>
+                            <div class="surface-container-low p-4 border border-[rgba(72,72,73,0.15)]">
+                                <div class="terminal-text text-[var(--color-tertiary)] text-xl">200+</div>
+                                <div class="terminal-text text-xs text-[var(--color-text-secondary)]">Controls Mapped</div>
+                            </div>
+                            <div class="surface-container-low p-4 border border-[rgba(72,72,73,0.15)]">
+                                <div class="terminal-text text-[var(--color-secondary)] text-xl">3</div>
+                                <div class="terminal-text text-xs text-[var(--color-text-secondary)]">ATO Approvals</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Divider: Hero → Experience -->
+        <div class="section-divider">
+            <div class="divider-line"></div>
+            <div class="divider-glow"></div>
+            <div class="divider-flare"></div>
+        </div>
+
+        <!-- Experience Timeline Section -->
+        <section id="experience" class="py-20 px-6 surface-container-low lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="space-grotesk text-3xl md:text-4xl mb-4">
+                    Timeline // <span class="italic">Protocol History</span>
+                </h2>
+                <p class="text-[var(--color-text-secondary)] mb-16">Professional journey and career milestones</p>
+
+                <div class="timeline" id="timeline">
+                    <!-- Scroll-synced tracker square -->
+                    <div class="timeline-tracker" id="timelineTracker"></div>
+                    <div class="timeline-glow" id="timelineGlow"></div>
+
+                    <!-- Timeline Item 1 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">SEP 2025 - PRESENT</div>
+                            <h3 class="space-grotesk text-lg mb-2">Sr. Information Security Analyst</h3>
+                            <p class="text-[var(--color-secondary)] font-semibold mb-3">Alipro &mdash; Remote, Bloomington, IL</p>
+                            <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                                Writing and maintaining full SSP and IT control documentation for an Azure-hosted platform. Drove end-to-end NIST RMF activities that helped clear ATO two weeks ahead of schedule. Mapped 200+ controls to NIST SP 800-53 families, cutting audit prep time by 40%.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="tag">Azure</div>
+                                <div class="tag">NIST RMF</div>
+                                <div class="tag">SSP</div>
+                                <div class="tag">FedRAMP</div>
+                                <div class="tag">Power BI</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">DEC 2021 - SEP 2025</div>
+                            <h3 class="space-grotesk text-lg mb-2">Sr. Information Security Engineer Analyst</h3>
+                            <p class="text-[var(--color-secondary)] font-semibold mb-3">United Health Group (Optum) &mdash; Hyderabad, India</p>
+                            <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                                Developed and maintained SSPs for FISMA-regulated healthcare platforms compliant with NIST SP 800-53, MARS-E, and ARC-AMPE. Supported A&A processes helping three major systems achieve ATO on time. Created golden templates that cut SSP drafting time by 30%.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="tag">RSA Archer</div>
+                                <div class="tag">FISMA</div>
+                                <div class="tag">MARS-E</div>
+                                <div class="tag">HIPAA</div>
+                                <div class="tag">AWS</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 3 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">JUL 2020 - SEP 2021</div>
+                            <h3 class="space-grotesk text-lg mb-2">Sr. Reporting Analyst</h3>
+                            <p class="text-[var(--color-secondary)] font-semibold mb-3">Infinity Education Consultants &mdash; Hyderabad, India</p>
+                            <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                                Managed IAM and access governance for an Azure PaaS CRM. Designed Entra ID RBAC models, enforced MFA and Conditional Access policies, reducing unauthorized access attempts by 60%. Monitored identity alerts via Microsoft Sentinel.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="tag">Entra ID</div>
+                                <div class="tag">Sentinel</div>
+                                <div class="tag">RBAC</div>
+                                <div class="tag">IAM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 4 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">OCT 2018 - APR 2019</div>
+                            <h3 class="space-grotesk text-lg mb-2">AWS Cloud Security Engineer</h3>
+                            <p class="text-[var(--color-secondary)] font-semibold mb-3">Storyqube / Voiceqube &mdash; Hyderabad, India</p>
+                            <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                                Engineered cloud security controls for a voice-based mobile platform on AWS. Hardened S3 buckets with encryption and access policies. Implemented centralized logging via CloudTrail and CloudWatch for anomaly detection.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="tag">AWS</div>
+                                <div class="tag">S3</div>
+                                <div class="tag">CloudTrail</div>
+                                <div class="tag">Splunk</div>
+                                <div class="tag">Nessus</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 5 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">OCT 2017 - OCT 2018</div>
+                            <h3 class="space-grotesk text-lg mb-2">Associate</h3>
+                            <p class="text-[var(--color-secondary)] font-semibold mb-3">Wipro / Google &mdash; Hyderabad, India</p>
+                            <p class="text-[var(--color-text-secondary)] text-sm mb-4">
+                                Verified and enriched geospatial datasets across 5+ map enhancement projects. Proposed a validation checklist adopted by the team that reduced error rates by 20%.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="tag">Data Quality</div>
+                                <div class="tag">GIS</div>
+                                <div class="tag">Validation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Divider: Experience → Skills -->
+        <div class="section-divider">
+            <div class="divider-line"></div>
+            <div class="divider-glow"></div>
+            <div class="divider-flare"></div>
+        </div>
+
+        <!-- Skills Bento Grid Section -->
+        <section id="skills" class="py-20 px-6 surface-container-low lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="space-grotesk text-3xl md:text-4xl mb-4">Skill Matrix // Core Competencies</h2>
+                <p class="text-[var(--color-text-secondary)] mb-16">Technical expertise and domain knowledge</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Skill Card 1 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">description</span>
+                        <h3 class="space-grotesk text-lg mb-4">GRC & Compliance</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">NIST 800-53</span>
+                            <span class="tag">RMF</span>
+                            <span class="tag">FedRAMP</span>
+                            <span class="tag">FISMA</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Card 2 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">cloud_sync</span>
+                        <h3 class="space-grotesk text-lg mb-4">Cloud Security</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">Azure</span>
+                            <span class="tag">AWS</span>
+                            <span class="tag">GCP</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Card 3 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">shield</span>
+                        <h3 class="space-grotesk text-lg mb-4">IAM & Zero Trust</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">Entra ID</span>
+                            <span class="tag">RBAC</span>
+                            <span class="tag">MFA</span>
+                            <span class="tag">CA Policy</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Card 4 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">verified_user</span>
+                        <h3 class="space-grotesk text-lg mb-4">A&A & ATO</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">SSP</span>
+                            <span class="tag">SAR</span>
+                            <span class="tag">POA&M</span>
+                            <span class="tag">Archer</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 93%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Card 5 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">radar</span>
+                        <h3 class="space-grotesk text-lg mb-4">SIEM & Monitoring</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">Sentinel</span>
+                            <span class="tag">QRadar</span>
+                            <span class="tag">Splunk</span>
+                            <span class="tag">Nessus</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Card 6 -->
+                    <div class="skill-card">
+                        <span class="material-symbols-outlined">build</span>
+                        <h3 class="space-grotesk text-lg mb-4">Tools & Reporting</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">Power BI</span>
+                            <span class="tag">SNOW</span>
+                            <span class="tag">JIRA</span>
+                            <span class="tag">SPO</span>
+                        </div>
+                        <div>
+                            <p class="terminal-text text-xs mb-2">Proficiency</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Divider: Skills → Projects -->
+        <div class="section-divider">
+            <div class="divider-line"></div>
+            <div class="divider-glow"></div>
+            <div class="divider-flare"></div>
+        </div>
+
+        <!-- Projects Section — Bento Grid -->
+        <section id="projects" class="py-20 px-6 lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="space-grotesk text-3xl md:text-4xl mb-4">
+                    Operation Log // <span class="italic">Key Projects</span>
+                </h2>
+                <p class="text-[var(--color-text-secondary)] mb-16">Recent projects and successful implementations</p>
+
+                <div class="bento-grid" id="bentoGrid">
+
+                    <!-- CARD 1 — Tall Left -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/600/800?grayscale&random=10');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">01</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">verified_user</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">ATO Acceleration — Azure</h3>
+                            <p class="bento-desc">Drove NIST RMF from FIPS 199 through continuous monitoring. Mapped 200+ controls, cleared ATO two weeks early with 95% acceptance.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">NIST RMF</span>
+                                <span class="bento-tag">ATO</span>
+                                <span class="bento-tag">Azure</span>
+                            </div>
+                        </div>
+                        <span class="bento-stat">200+ controls mapped</span>
+                    </div>
+
+                    <!-- CARD 2 — Wide Top-Center -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/800/400?grayscale&random=11');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">02</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">description</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">Enterprise Healthcare SSP</h3>
+                            <p class="bento-desc">Built SSPs for FISMA-regulated healthcare platforms at Optum. Created golden templates cutting drafting time by 30%. Helped 3 systems achieve ATO.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">SSP</span>
+                                <span class="bento-tag">FISMA</span>
+                                <span class="bento-tag">MARS-E</span>
+                                <span class="bento-tag">Archer</span>
+                            </div>
+                        </div>
+                        <span class="bento-stat">3 ATO approvals</span>
+                    </div>
+
+                    <!-- CARD 3 — Tall Right -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/600/800?grayscale&random=12');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">03</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">shield</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">IAM Governance — Azure CRM</h3>
+                            <p class="bento-desc">Designed Entra ID RBAC models, enforced MFA and Conditional Access. Reduced unauthorized access by 60%.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">Entra ID</span>
+                                <span class="bento-tag">RBAC</span>
+                                <span class="bento-tag">Sentinel</span>
+                            </div>
+                        </div>
+                        <span class="bento-stat">-60% unauth access</span>
+                    </div>
+
+                    <!-- CARD 4 — Small Center-Left -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/400/400?grayscale&random=13');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">04</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">cloud</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">AWS Cloud Hardening</h3>
+                            <p class="bento-desc">Engineered security controls for voice platform. Hardened S3 with SSE-KMS, implemented CloudTrail logging.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">AWS</span>
+                                <span class="bento-tag">S3</span>
+                                <span class="bento-tag">CloudTrail</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 5 — Small Center-Right -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/400/400?grayscale&random=14');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">05</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">monitoring</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">Security Dashboards</h3>
+                            <p class="bento-desc">Built Power BI dashboards consolidating incident, access review, and remediation data for leadership KPI visibility.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">Power BI</span>
+                                <span class="bento-tag">KPI</span>
+                                <span class="bento-tag">Audit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 6 — Wide Bottom-Left -->
+                    <div class="bento-card">
+                        <div class="bento-bg" style="background-image:url('https://picsum.photos/800/400?grayscale&random=15');"></div>
+                        <div class="bento-scanline"></div>
+                        <div class="bento-accent"></div>
+                        <span class="bento-index">06</span>
+                        <span class="bento-icon material-symbols-outlined" style="font-size:28px;">policy</span>
+                        <div class="bento-content">
+                            <h3 class="bento-title">POA&M Remediation Engine</h3>
+                            <p class="bento-desc">Managed POA&M register end-to-end, coordinating with engineering to close 15 findings in under two months. 90%+ resolved within target timelines.</p>
+                            <div class="bento-tags">
+                                <span class="bento-tag">POA&M</span>
+                                <span class="bento-tag">GRC</span>
+                                <span class="bento-tag">Remediation</span>
+                                <span class="bento-tag">NIST</span>
+                            </div>
+                        </div>
+                        <span class="bento-stat">15 findings closed in 2mo</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Divider: Projects → Education -->
+        <div class="section-divider">
+            <div class="divider-line"></div>
+            <div class="divider-glow"></div>
+            <div class="divider-flare"></div>
+        </div>
+
+        <!-- Education & Certifications Section -->
+        <section class="py-20 px-6 surface-container-low lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="space-grotesk text-3xl md:text-4xl mb-16">Credentials // Learning Journey</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Education -->
+                    <div>
+                        <h3 class="space-grotesk text-xl mb-8">Education</h3>
+                        <div class="cert-card">
+                            <div class="terminal-text text-[var(--color-primary)] text-sm mb-2">2013 - 2017</div>
+                            <h4 class="space-grotesk text-base mb-2">B.Tech — Computer Science</h4>
+                            <p class="text-[var(--color-secondary)] text-sm mb-2">JNTU Hyderabad</p>
+                        </div>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div>
+                        <h3 class="space-grotesk text-xl mb-8">Professional Certifications</h3>
+                        <div class="space-y-4">
+                            <div class="cert-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p class="terminal-text text-[var(--color-primary)] text-sm mb-1">CompTIA Security+</p>
+                                        <p class="text-[var(--color-text-secondary)] text-xs">Optum Corporate Training</p>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="cert-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p class="terminal-text text-[var(--color-primary)] text-sm mb-1">CC — Cybersecurity</p>
+                                        <p class="text-[var(--color-text-secondary)] text-xs">ISC2</p>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="cert-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p class="terminal-text text-[var(--color-secondary)] text-sm mb-1">SAFe Scrum Master 6.0</p>
+                                        <p class="text-[var(--color-text-secondary)] text-xs">SAFe Agile</p>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="cert-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p class="terminal-text text-[var(--color-secondary)] text-sm mb-1">Azure Admin AZ-104</p>
+                                        <p class="text-[var(--color-text-secondary)] text-xs">Udemy</p>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="cert-card">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p class="terminal-text text-[var(--color-tertiary)] text-sm mb-1">CCSP — In Progress</p>
+                                        <p class="text-[var(--color-text-secondary)] text-xs">ISC2</p>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 55%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Divider: Education → Contact -->
+        <div class="section-divider">
+            <div class="divider-line"></div>
+            <div class="divider-glow"></div>
+            <div class="divider-flare"></div>
+        </div>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 px-6 lg:ml-20">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="space-grotesk text-3xl md:text-5xl mb-16 leading-tight">
+                    Initialize<br>Direct<br><span class="text-[var(--color-primary)]">Link</span>
+                </h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Contact Info -->
+                    <div>
+                        <div class="mb-12">
+                            <p class="terminal-text text-[var(--color-tertiary)] text-sm mb-4">EMAIL</p>
+                            <a href="mailto:ogmadhavaa@gmail.com" class="text-xl text-white hover:text-[var(--color-primary)] transition">
+                                ogmadhavaa@gmail.com
+                            </a>
+                        </div>
+
+                        <div class="mb-12">
+                            <p class="terminal-text text-[var(--color-tertiary)] text-sm mb-4">PHONE</p>
+                            <p class="text-xl text-[var(--color-text-secondary)]">
+                                (309) 612-6327
+                            </p>
+                        </div>
+
+                        <div class="mb-12">
+                            <p class="terminal-text text-[var(--color-tertiary)] text-sm mb-4">LOCATION</p>
+                            <p class="text-xl text-[var(--color-text-secondary)]">
+                                Bloomington, IL &mdash; Remote-First
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="terminal-text text-[var(--color-tertiary)] text-sm mb-4">AVAILABILITY</p>
+                            <div class="flex gap-3">
+                                <a href="https://www.linkedin.com/in/kolluri-madhava-sai-4587a711a/" target="_blank" class="text-white hover:text-[var(--color-primary)] transition" title="LinkedIn">
+                                    <span class="material-symbols-outlined text-2xl">work</span>
+                                </a>
+                                <a href="mailto:ogmadhavaa@gmail.com" class="text-white hover:text-[var(--color-primary)] transition" title="Email">
+                                    <span class="material-symbols-outlined text-2xl">mail</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div>
+                        <form class="space-y-8">
+                            <div>
+                                <label class="terminal-text text-[var(--color-primary)] text-xs mb-2 block">NAME</label>
+                                <input
+                                    type="text"
+                                    placeholder="Your name"
+                                    class="form-input"
+                                    required
+                                >
+                            </div>
+
+                            <div>
+                                <label class="terminal-text text-[var(--color-primary)] text-xs mb-2 block">EMAIL</label>
+                                <input
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    class="form-input"
+                                    required
+                                >
+                            </div>
+
+                            <div>
+                                <label class="terminal-text text-[var(--color-primary)] text-xs mb-2 block">MESSAGE</label>
+                                <textarea
+                                    placeholder="Tell me about your project..."
+                                    class="form-input resize-none"
+                                    rows="5"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-full">
+                                Establish Connection
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-6 surface-container-low lg:ml-20 border-t border-[rgba(72,72,73,0.15)]">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <!-- Copyright -->
+                    <div>
+                        <p class="terminal-text text-[var(--color-text-secondary)] text-xs">
+                            © 2026 Madhavaa. All rights reserved.
+                        </p>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="flex gap-6 items-center">
+                        <a href="https://github.com/ogmadhavaa" target="_blank" class="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition" title="GitHub">
+                            <span class="material-symbols-outlined">code</span>
+                        </a>
+                        <a href="https://www.linkedin.com/in/kolluri-madhava-sai-4587a711a/" target="_blank" class="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition" title="LinkedIn">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:ogmadhavaa@gmail.com" class="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                        <a href="dashboard.html" class="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition" title="Dashboard">
+                            <span class="material-symbols-outlined">dashboard</span>
+                        </a>
+                    </div>
+
+                    <!-- Timezone Display -->
+                    <div class="flex gap-6 text-xs terminal-text text-[var(--color-text-secondary)]">
+                        <div>
+                            <span class="text-[var(--color-tertiary)]" id="tz-est">--:--</span>
+                            <span class="block text-xs">EST</span>
+                        </div>
+                        <div>
+                            <span class="text-[var(--color-tertiary)]" id="tz-pst">--:--</span>
+                            <span class="block text-xs">PST</span>
+                        </div>
+                        <div>
+                            <span class="text-[var(--color-tertiary)]" id="tz-ist">--:--</span>
+                            <span class="block text-xs">IST</span>
+                        </div>
+                        <div>
+                            <span class="text-[var(--color-tertiary)]" id="tz-cst">--:--</span>
+                            <span class="block text-xs">CST</span>
+                        </div>
+                        <div>
+                            <span class="text-[var(--color-tertiary)]" id="tz-gmt">--:--</span>
+                            <span class="block text-xs">GMT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- WhatsApp FAB -->
+    <a href="https://wa.me/1234567890" target="_blank" class="fab" title="Chat on WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="color: #000;">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.928 1.227l-.36-.18L7.06 5.555c.378.415.901.98 1.85 1.886-1.592 2.247-2.155 5.364-1.326 8.257l.306.995-1.039.474c-2.389.966-3.965.027-4.247-.522-.141-.256-.425-.974-.425-2.191 0-1.507.548-3.087 1.527-4.411.30-.41.616-.805.923-1.187.31-.393.522-.648.522-.648s.602-.765 1.416-1.586c.814-.82 1.532-1.554 1.532-1.554.308-.293.623-.57.942-.827 1.125-.876 2.41-1.51 3.841-1.51z"/>
+        </svg>
+    </a>
+
+    <!-- JavaScript -->
+    <script>
+        // Timezone Display Function
+        function updateTimezones() {
+            const now = new Date();
+
+            const timezones = {
+                'tz-est': 'America/New_York',
+                'tz-pst': 'America/Los_Angeles',
+                'tz-ist': 'Asia/Kolkata',
+                'tz-cst': 'Asia/Shanghai',
+                'tz-gmt': 'Europe/London'
+            };
+
+            Object.entries(timezones).forEach(([id, tz]) => {
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    timeZone: tz
+                });
+                document.getElementById(id).textContent = formatter.format(now);
+            });
+        }
+
+        // Update on load and every minute
+        updateTimezones();
+        setInterval(updateTimezones, 60000);
+
+        // Smooth Scroll Enhancement
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && document.querySelector(href)) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Form Submission Handler
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const name = this.querySelector('input[type="text"]').value;
+
+            // Show success feedback
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'Connection Established ✓';
+            btn.style.backgroundColor = 'var(--color-primary-dark)';
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = '';
+                this.reset();
+            }, 3000);
+        });
+
+        // Resume Button Handler
+        document.querySelector('.btn-primary').addEventListener('click', function(e) {
+            if (this.textContent.includes('Resume')) {
+                // In a real scenario, this would download the resume
+                alert('Resume download initiated. In production, this would download a PDF file.');
+            }
+        });
+
+        // Sidebar scroll-spy: highlight active section on scroll
+        (function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-icon[data-section]');
+            const sections = [];
+            sidebarLinks.forEach(link => {
+                const id = link.getAttribute('data-section');
+                const el = document.getElementById(id);
+                if (el) sections.push({ id, el, link });
+            });
+
+            function updateActive() {
+                let current = sections[0];
+                const scrollY = window.scrollY + window.innerHeight / 3;
+                sections.forEach(s => {
+                    if (s.el.offsetTop <= scrollY) current = s;
+                });
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                if (current) current.link.classList.add('active');
+            }
+
+            window.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        })();
+
+        // Intersection Observer for skill cards animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.skill-card, .cert-card, .project-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Bento card scroll-reveal observer
+        const bentoObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    bentoObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+        document.querySelectorAll('.bento-card').forEach(card => {
+            bentoObserver.observe(card);
+        });
+    </script>
+    <!-- Timeline scroll-sync tracker (smooth lerp) -->
+    <script>
+    (function() {
+        const timeline = document.getElementById('timeline');
+        const tracker = document.getElementById('timelineTracker');
+        const glow = document.getElementById('timelineGlow');
+        const items = Array.from(document.querySelectorAll('.timeline-item'));
+        if (!timeline || !tracker || items.length === 0) return;
+
+        let targetY = 0;
+        let currentY = 0;
+        const LERP = 0.08; // smoothing factor — lower = smoother
+        let ticking = false;
+
+        function getTargetY() {
+            const trigger = window.innerHeight * 0.4;
+            const timelineRect = timeline.getBoundingClientRect();
+
+            // Compute a continuous position by interpolating between items
+            for (let i = 0; i < items.length; i++) {
+                const rect = items[i].getBoundingClientRect();
+                const itemTop = rect.top;
+                const itemBottom = rect.bottom;
+
+                // If the trigger line is above the first item, clamp to top
+                if (i === 0 && trigger < itemTop) {
+                    return items[0].offsetTop;
+                }
+
+                // If trigger is within this item
+                if (trigger >= itemTop && trigger <= itemBottom) {
+                    const progress = (trigger - itemTop) / rect.height;
+                    const currentOffset = items[i].offsetTop;
+                    const nextOffset = (i < items.length - 1) ? items[i + 1].offsetTop : currentOffset + rect.height;
+                    return currentOffset + progress * (nextOffset - currentOffset);
+                }
+
+                // If between this item and the next
+                if (i < items.length - 1) {
+                    const nextRect = items[i + 1].getBoundingClientRect();
+                    if (trigger > itemBottom && trigger < nextRect.top) {
+                        const gapProgress = (trigger - itemBottom) / (nextRect.top - itemBottom);
+                        return items[i].offsetTop + items[i].offsetHeight +
+                               gapProgress * (items[i + 1].offsetTop - items[i].offsetTop - items[i].offsetHeight);
+                    }
+                }
+            }
+
+            // Past last item
+            return items[items.length - 1].offsetTop + items[items.length - 1].offsetHeight * 0.5;
+        }
+
+        function updateActiveCards() {
+            const trigger = window.innerHeight * 0.4;
+            let closestIdx = 0;
+            let closestDist = Infinity;
+
+            items.forEach((item, i) => {
+                const rect = item.getBoundingClientRect();
+                const center = rect.top + rect.height / 2;
+                const dist = Math.abs(center - trigger);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = i;
+                }
+            });
+
+            items.forEach((item, i) => {
+                const content = item.querySelector('.timeline-content');
+                if (i === closestIdx) {
+                    content.classList.add('tl-active');
+                } else {
+                    content.classList.remove('tl-active');
+                }
+            });
+        }
+
+        function animate() {
+            // Lerp toward target
+            currentY += (targetY - currentY) * LERP;
+
+            // Snap if close enough
+            if (Math.abs(currentY - targetY) < 0.5) {
+                currentY = targetY;
+            }
+
+            tracker.style.top = currentY + 'px';
+            glow.style.height = (currentY + 8) + 'px';
+
+            // Keep animating if not settled
+            if (Math.abs(currentY - targetY) > 0.5) {
+                requestAnimationFrame(animate);
+            } else {
+                ticking = false;
+            }
+        }
+
+        function onScroll() {
+            targetY = getTargetY();
+            updateActiveCards();
+
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(animate);
+            }
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', () => {
+            targetY = getTargetY();
+            updateActiveCards();
+            if (!ticking) { ticking = true; requestAnimationFrame(animate); }
+        });
+
+        // Initialize
+        setTimeout(() => {
+            targetY = getTargetY();
+            currentY = targetY;
+            tracker.style.top = currentY + 'px';
+            glow.style.height = (currentY + 8) + 'px';
+            updateActiveCards();
+        }, 150);
+    })();
+    </script>
+    <script src="morph-scroll.js"></script>
+
+    <!-- CV Download Modal -->
+    <div class="cv-modal-overlay" id="cvModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="cv-modal">
+            <button class="cv-modal-close" onclick="document.getElementById('cvModal').classList.remove('active')">&times;</button>
+            <div class="cv-modal-subtitle">// select format</div>
+            <div class="cv-modal-title">Download CV</div>
+            <div class="cv-option" onclick="triggerDownload('Madhavaa_CV.pdf')" style="cursor:pointer;">
+                <div class="cv-option-icon">PDF</div>
+                <div class="cv-option-info">
+                    <div class="cv-option-name">PDF Document</div>
+                    <div class="cv-option-desc">Best for viewing &amp; sharing</div>
+                </div>
+                <span class="cv-option-arrow">&#8594;</span>
+            </div>
+            <div class="cv-option" onclick="triggerDownload('Madhavaa_CV.docx')" style="cursor:pointer;">
+                <div class="cv-option-icon">DOCX</div>
+                <div class="cv-option-info">
+                    <div class="cv-option-name">Word Document</div>
+                    <div class="cv-option-desc">Best for editing &amp; ATS systems</div>
+                </div>
+                <span class="cv-option-arrow">&#8594;</span>
+            </div>
+        </div>
+    </div>
+    <script>
+    function triggerDownload(filename) {
+        document.getElementById('cvModal').classList.remove('active');
+        var iframe = document.getElementById('dlFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'dlFrame';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = filename;
+    }
+    </script>
+</body>
+</html>
